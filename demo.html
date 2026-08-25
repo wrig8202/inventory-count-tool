@@ -1386,15 +1386,67 @@ function showToast(m){$('toast').innerHTML=m; $('toast').classList.add('show'); 
 
 buildStartUI();
 
-(function(){ var b=document.getElementById('btnDemo'); if(!b)return;
-  b.onclick=function(){
+(function(){
+  var b = document.getElementById('btnDemo');
+  if(!b) return;
+
+  b.onclick = function(){
     try{
-      fytData={}; FAM_IDS.forEach(function(f){ fytData[f]=(DEMO_FYT[f]||[]).map(function(r){return {tipalm:r.tipalm,area:r.area,bin:r.bin,prod:r.prod,canido:r.canido,cantidad:r.cantidad,fecfab:r.fecfab};}); });
-      counter='Demo User';
-      if(typeof startSession==='function'){ startSession(); }
-      else { var cn=document.getElementById('counterName'); if(cn)cn.value='Demo User'; var sb=document.getElementById('btnStart')||document.getElementById('startBtn'); if(sb)sb.click(); }
-      showToast('Demo data loaded \u2014 walk the floor, validate racks, check Days of Stock.');
-    }catch(e){ showToast('Could not load demo data.'); }
+
+      // Load the built-in synthetic demo data
+      fytData = {};
+
+      FAM_IDS.forEach(function(f){
+        fytData[f] = (DEMO_FYT[f] || []).map(function(r){
+          return {
+            tipalm: r.tipalm,
+            area: r.area,
+            bin: r.bin,
+            prod: r.prod,
+            canido: r.canido,
+            cantidad: r.cantidad,
+            fecfab: r.fecfab
+          };
+        });
+      });
+
+      // Configure the demo like a real System Mode session
+      appMode = 'fyt';
+
+      counter = 'Demo User';
+      $('counterName').value = counter;
+
+      // Automatically start with the first configured family
+      startFamily = FAM_IDS[0];
+      activeFamily = startFamily;
+
+      startTime = $('startTime').value.trim();
+
+      // Build the actual counting screen
+      $('ctxMode').textContent = 'System';
+
+      buildTabs();
+      applyFamily();
+
+      $('startScreen').style.display = 'none';
+      $('countScreen').style.display = 'block';
+
+      showTab('count');
+
+      // Save the demo session
+      saveSession();
+
+      showToast(
+        'Demo data loaded — walk the floor, validate racks, check Days of Stock.'
+      );
+
+    } catch(e){
+
+      // Helpful for future debugging
+      console.error('Demo startup error:', e);
+
+      showToast('Could not load demo data.');
+    }
   };
 })();
 </script>
