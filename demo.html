@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PlayCraft Inventory Count</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{ --brandteal:#0E3139; --brandochre:#D9A55B; }
+body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif !important;}
+h1,h2,h3,.mh-title,.wm-text{font-family:'Playfair Display',Georgia,serif !important;}
+.mono,.wm-sub{font-family:'IBM Plex Mono',ui-monospace,monospace !important;}
+
+:root{--navy:#0E3139;--navy2:#0d3480;--yellow:#FFCC00;--ink:#1a1a1a;--muted:#6b7280;--line:#e5e7eb;--surface:#fff;--surface1:#f7f8fa;--radius:8px;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;--mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--sans);background:#eef1f6;color:var(--ink);padding:14px;}
+.app{max-width:720px;margin:0 auto;}
+.brandbar{background:var(--navy);border-radius:12px 12px 0 0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:4px solid var(--yellow);flex-wrap:wrap;}
+.wm{display:flex;align-items:center;gap:10px;}
+.wm-mark{width:28px;height:28px;border-radius:50%;background:var(--yellow);display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:700;font-size:14px;}
+.wm-text{color:#fff;font-size:15px;font-weight:600;}.wm-sub{color:#9DB2E0;font-size:12px;}
+.ctx{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.ctx-item .k{color:#9DB2E0;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;}
+.ctx-item .v{color:#fff;font-size:13px;font-weight:600;}
+.top-actions{display:flex;gap:8px;align-items:center;}
+.rec-top-btn{background:var(--yellow);color:var(--navy);border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);}
+.fam-switch{background:transparent;color:#fff;border:1px solid #9DB2E0;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);}
+.panel{background:var(--surface);border:1px solid var(--line);border-top:none;border-radius:0 0 12px 12px;padding:1.25rem;}
+.section-label{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px;display:block;text-transform:uppercase;letter-spacing:.03em;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:600;margin-right:6px;}
+.resume-banner{background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;padding:12px 14px;margin-bottom:1.25rem;display:none;}
+.resume-banner .rt{font-size:13px;color:#7A5C00;font-weight:600;margin-bottom:8px;}
+.resume-banner .rb{display:flex;gap:8px;}
+.mode-pick,.upload-grid,.fam-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.mode-pick-btn{padding:12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface1);cursor:pointer;text-align:center;}
+.mode-pick-btn.active{border-color:var(--navy);background:var(--navy);color:#fff;}
+.mode-pick-btn .mt{font-size:14px;font-weight:700;}.mode-pick-btn .md{font-size:11px;color:var(--muted);margin-top:2px;}
+.mode-pick-btn.active .md{color:#9DB2E0;}
+.upload-zone{border:2px dashed #c7ccd6;border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:var(--surface1);}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--navy);background:#EFF3FC;}
+.upload-zone.loaded{border-color:#2E7D32;background:#E8F5E9;border-style:solid;}
+.upload-icon{font-size:22px;color:var(--muted);margin-bottom:6px;}.upload-zone.loaded .upload-icon{color:#2E7D32;}
+.upload-title{font-size:13px;font-weight:700;}.upload-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.35;}
+.upload-zone.loaded .upload-sub{color:#2E7D32;}
+input[type=file]{display:none;}
+.config-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface1);border:1px solid var(--line);border-radius:var(--radius);padding:8px 12px;margin-bottom:1.25rem;font-size:12px;color:var(--muted);}
+.config-btn{background:none;border:1px solid #c7ccd6;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;color:var(--navy);font-family:var(--sans);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem;}
+.field{display:flex;flex-direction:column;gap:5px;}
+label{font-size:12px;color:var(--muted);font-weight:600;}
+select,input[type=text],input[type=number]{width:100%;height:40px;border:1px solid #c7ccd6;border-radius:var(--radius);padding:0 10px;font-size:15px;color:var(--ink);background:#fff;font-family:var(--sans);}
+select:focus,input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 2px rgba(10,42,102,.15);}
+.fam-btn{padding:14px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface1);cursor:pointer;text-align:left;}
+.fam-btn.active{border-color:var(--navy);background:var(--navy);}
+.fam-btn:disabled{opacity:.4;cursor:not-allowed;}
+.fam-btn .fn{font-size:15px;font-weight:600;}.fam-btn.active .fn{color:#fff;}
+.fam-btn .fd{font-size:11px;color:var(--muted);margin-top:2px;}.fam-btn.active .fd{color:#9DB2E0;}
+.start-btn{width:100%;height:46px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);}
+.start-btn:disabled{opacity:.35;cursor:default;}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;flex-wrap:wrap;}
+.tab-btn{padding:10px 16px;background:var(--surface1);border:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);font-family:var(--sans);}
+.tab-btn.active{background:var(--navy);color:#fff;}
+.machine-lock{display:flex;align-items:center;gap:10px;background:#EFF3FC;border:1px solid #C0D0F0;border-radius:var(--radius);padding:10px 14px;margin-bottom:1rem;}
+.machine-lock .ml{font-size:15px;font-weight:600;color:var(--navy);flex:1;}.machine-lock .ml-sub{font-size:11px;color:#5575B0;}
+.ml-change{background:none;border:none;color:var(--navy);font-size:12px;cursor:pointer;text-decoration:underline;font-family:var(--sans);}
+.mat-tiles{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem;}
+.mat-tile{padding:9px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface1);cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);font-family:var(--mono);}
+.mat-tile.active{background:var(--yellow);border-color:#CCAA00;color:var(--navy);}
+.tile-group-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#6b7280;margin:2px 0 6px;text-transform:uppercase;}
+.exp-row{margin-bottom:12px;}
+.mat-tile-exp{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 16px;font-size:15px;border-width:2px;border-color:#0A2A66;min-width:104px;min-height:52px;background:#fff;position:relative;}
+.mat-tile-exp .mt-code{font-size:15px;font-weight:700;}
+.mat-tile-exp .mt-fyt{font-size:11px;color:#6b7280;font-weight:500;}
+.mat-tile-exp.is-sel{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:0 4px 12px rgba(10,42,102,.25);transform:translateY(-1px);}
+.mat-tile-exp.is-counted .mt-fyt{color:var(--navy);font-weight:700;}
+.exp-kg{margin:0 4px;}
+.qty-block{background:var(--surface1);border-radius:10px;padding:14px;margin-bottom:1rem;}
+.qty-lbl{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;text-align:center;}
+.unit-toggle{display:flex;justify-content:center;margin-bottom:12px;}
+.ut-btn{padding:6px 16px;font-size:12px;font-weight:700;border:1px solid #c7ccd6;background:#fff;color:var(--muted);cursor:pointer;font-family:var(--sans);}
+.ut-btn:first-child{border-radius:6px 0 0 6px;}.ut-btn:last-child{border-radius:0 6px 6px 0;border-left:none;}
+.ut-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.qty-controls{display:flex;align-items:center;justify-content:center;gap:8px;}
+.qbig{width:54px;height:54px;border:none;border-radius:10px;background:var(--navy);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;line-height:1.1;font-family:var(--sans);}
+.qbig.neg{background:#fff;color:var(--navy);border:1.5px solid var(--navy);}
+.qsm{width:42px;height:42px;font-size:13px;font-weight:600;border:1px solid #c7ccd6;border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;font-family:var(--sans);}
+.qty-display{font-size:32px;font-weight:600;min-width:90px;text-align:center;font-variant-numeric:tabular-nums;}
+.qbtxt{font-size:15px;font-weight:700;}.qbnum{font-size:10px;opacity:.8;}
+.qty-typed{display:flex;justify-content:center;}.qty-typed input{max-width:180px;text-align:center;font-size:18px;height:46px;}
+.conv-readout{text-align:center;margin-top:10px;font-size:13px;color:var(--muted);min-height:18px;}.conv-readout b{color:var(--navy);font-weight:700;}
+.warn-box{background:#FFF8E1;border:1px solid #FFE082;border-radius:var(--radius);padding:10px 12px;margin-bottom:1rem;font-size:13px;color:#7A5C00;display:flex;gap:8px;}
+.btn-row{display:flex;gap:8px;}
+.btn-log{flex:1;height:44px;background:var(--yellow);color:var(--navy);border:none;border-radius:var(--radius);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--sans);}
+.btn-sec{height:44px;padding:0 16px;background:transparent;color:var(--muted);border:1px solid #c7ccd6;border-radius:var(--radius);font-size:14px;cursor:pointer;font-family:var(--sans);}
+.rack-area-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;}
+.add-loc-btn{width:100%;padding:10px;border:1.5px dashed var(--navy);border-radius:var(--radius);background:#EFF3FC;color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);margin-bottom:10px;}
+.add-loc-panel{background:#EFF3FC;border:1px solid #C0D0F0;border-radius:var(--radius);padding:12px;margin-bottom:12px;}
+.fyt-wrap{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+.fyt-head{display:grid;grid-template-columns:15% 19% 10% 12% 44%;background:var(--surface1);border-bottom:1px solid var(--line);}
+.fyt-head span{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;padding:7px 6px;}
+.fyt-item{border-bottom:1px solid var(--line);}.fyt-item:last-child{border-bottom:none;}
+.fyt-row{display:grid;grid-template-columns:15% 19% 10% 12% 44%;align-items:center;border-bottom:2px solid #fff;min-height:46px;}
+.fyt-item.is-match .fyt-row{background:#E8F5E9;}.fyt-item.is-flag .fyt-row{background:#FFF8E1;}.fyt-item.is-miss .fyt-row{background:#FDECEA;}.fyt-item.is-added .fyt-row{background:#E3F2FD;}
+.fyt-row span{font-size:12px;padding:9px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.fyt-row .mono{font-family:var(--mono);}
+.age-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:5px;vertical-align:middle;}
+.age-y{background:#F6C000;}.age-r{background:#D93025;}
+.fyt-actions{display:flex;align-items:center;gap:6px;padding:7px 6px;flex-wrap:wrap;}
+.ra{font-size:12px;padding:9px 13px;border-radius:6px;cursor:pointer;border:none;font-family:var(--sans);font-weight:700;white-space:nowrap;min-height:38px;}
+.ra-m{background:#C8E6C9;color:#1B5E20;}.ra-f{background:#FFE082;color:#7A5C00;}.ra-x{background:#FBD5D5;color:#C0392B;}
+.sb{font-size:10px;padding:3px 8px;border-radius:4px;font-weight:700;white-space:nowrap;}
+.sb-ok{background:#C8E6C9;color:#1B5E20;}.sb-flag{background:#FFE082;color:#7A5C00;}.sb-miss{background:#FBD5D5;color:#C0392B;}.sb-add{background:#BBDEFB;color:#0D47A1;}
+.reset-mini{font-size:10px;color:var(--muted);cursor:pointer;background:none;border:none;text-decoration:underline;font-family:var(--sans);margin-left:4px;}
+.fyt-expand{padding:10px 12px;background:#FFFDF5;border-top:1px dashed #FFE082;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.fyt-orig{font-size:11px;color:var(--muted);}.fyt-orig b{color:var(--ink);}
+.exp-stepper{display:flex;align-items:center;gap:6px;}
+.exp-btn{width:32px;height:32px;border:1px solid #c7ccd6;border-radius:6px;background:#fff;color:var(--navy);font-size:14px;font-weight:700;cursor:pointer;}
+.exp-val{font-size:16px;font-weight:700;min-width:48px;text-align:center;font-variant-numeric:tabular-nums;color:var(--navy);}
+.exp-conv{font-size:12px;color:var(--navy);font-weight:600;}
+.exp-var{font-size:11px;padding:3px 8px;border-radius:4px;font-weight:700;}
+.rack-footer{font-size:11px;color:var(--muted);padding:9px 10px;border-top:1px solid var(--line);display:flex;gap:12px;flex-wrap:wrap;}
+.rack-empty{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.cover-banner{padding:8px 12px;border-radius:var(--radius);font-size:12px;font-weight:600;margin-bottom:10px;}
+.cover-ok{background:#E8F5E9;color:#1B5E20;}.cover-warn{background:#FFF8E1;color:#7A5C00;}
+.age-legend{font-size:11px;color:var(--muted);margin:0 0 10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.log-card{margin-top:1rem;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.25rem;}
+.log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px;}
+.log-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.log-actions{display:flex;flex-direction:column;gap:8px;}
+.log-row{display:flex;gap:6px;flex-wrap:wrap;}
+.log-row2{padding-top:8px;border-top:1px dashed var(--line);}
+.mini-btn{height:32px;padding:0 12px;font-size:12px;border-radius:var(--radius);cursor:pointer;font-family:var(--sans);border:1px solid #c7ccd6;background:transparent;color:var(--muted);}
+.mini-btn.undo{border-color:#7A5C00;color:#7A5C00;}.mini-btn.nb{border-color:var(--navy);color:var(--navy);}.mini-btn.danger{color:#C0392B;border-color:#f0b4ae;}
+.save-ind{font-size:10px;color:#2E7D32;margin-left:4px;}
+.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-bottom:.5rem;}
+.stat{background:var(--surface1);border-radius:var(--radius);padding:10px 12px;}
+.stat.hl{background:var(--navy);}.stat.hl2{background:var(--yellow);}
+.stat-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:2px;}
+.stat.hl .stat-label{color:#9DB2E0;}.stat.hl2 .stat-label{color:#7A5C00;}
+.stat-value{font-size:16px;font-weight:700;white-space:nowrap;}.stat.hl .stat-value{color:#fff;}.stat.hl2 .stat-value{color:var(--navy);}
+.window-line{font-size:11px;color:var(--muted);margin-bottom:1rem;}
+.log-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+.log-table th{text-align:left;padding:6px;color:var(--muted);font-weight:600;font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--line);}
+.log-table td{padding:8px 6px;border-bottom:1px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+.loc-pill{font-size:9px;padding:2px 5px;border-radius:3px;font-weight:600;}
+.loc-m{background:#E3F0FF;color:#1A5276;}.loc-r{background:#FFF3CC;color:#7A5C00;}.loc-b{background:#EDE7F6;color:#5B3E8E;}.loc-c{background:#D6EAF8;color:#1A5276;}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px;}
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:13px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;padding:20px;z-index:200;overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:12px;max-width:520px;width:100%;margin-top:30px;overflow:hidden;}
+.modal-head{background:var(--navy);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
+.modal-head .mh-title{font-size:15px;font-weight:600;}.modal-close{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;}
+.modal-body{padding:18px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:var(--radius);padding:10px 18px;font-size:13px;box-shadow:0 2px 12px rgba(0,0,0,.25);opacity:0;transition:opacity .2s;pointer-events:none;z-index:300;}
+.toast.show{opacity:1;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+.walk-bar{display:flex;align-items:center;gap:10px;background:#EFF3FC;border:1px solid #C0D0F0;border-radius:var(--radius);padding:8px 12px;margin-bottom:1rem;flex-wrap:wrap;font-size:13px;color:var(--navy);}
+.wb-next{flex:1;min-width:120px;}
+.wb-go{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);}
+.wb-list{background:none;border:1px solid #C0D0F0;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--navy);font-family:var(--sans);}
+.wb-prog{font-size:11px;color:var(--muted);}
+.wl-item{display:flex;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px;}
+.wl-item:hover{background:var(--surface1);}
+.wl-num{width:24px;color:var(--muted);font-size:11px;}
+.wl-done{color:#1B5E20;font-weight:600;}
+.wl-type{font-size:10px;padding:1px 6px;border-radius:3px;margin-left:auto;font-weight:600;}
+.wl-r{background:#FFF3CC;color:#7A5C00;}.wl-m{background:#E3F0FF;color:#1A5276;}
+.wl-cur{background:#FFF8E1;}
+#printArea{display:none;}
+@media print{
+  body *{visibility:hidden;}
+  #printArea,#printArea *{visibility:visible;}
+  #printArea{display:block;position:absolute;left:0;top:0;width:100%;padding:0;}
+  .print-h{font-size:16px;font-weight:700;margin-bottom:2px;}
+  .print-sub{font-size:11px;color:#444;margin-bottom:10px;}
+  .print-area-h{font-size:13px;font-weight:700;margin:12px 0 4px;border-bottom:1px solid #000;}
+  table.pt{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;}
+  table.pt th,table.pt td{border:1px solid #999;padding:4px 6px;text-align:left;}
+  table.pt th{background:#eee;}
+  .pt .wcol{width:22%;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div id="startScreen">
+  <div class="brandbar"><div class="wm"><div class="wm-mark">ow</div><div><div class="wm-text" id="brandTitle">PlayCraft Inventory Count</div><div class="wm-sub">Compound &amp; Film &middot; Demo</div></div></div></div>
+  <div class="panel">
+    <div class="resume-banner" id="resumeBanner"><div class="rt" id="resumeText"></div><div class="rb"><button class="start-btn" id="btnResume" style="height:38px;">Resume</button><button class="btn-sec" id="btnDiscard">Discard &amp; start fresh</button></div></div>
+    <div style="background:#EAF0F1;border:1px solid #BCD3D6;border-radius:10px;padding:14px;margin-bottom:14px;text-align:center;"><div style="font-family:'Playfair Display',serif;font-weight:700;color:#0E3139;font-size:17px;margin-bottom:2px;">Portfolio demo</div><div style="font-size:13px;color:#4b5563;margin-bottom:10px;">Fictional PlayCraft compound factory, fully synthetic data. Nothing to upload &mdash; just start.</div><button id="btnDemo" style="background:#0E3139;color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">&#9658; Load Demo Data &amp; Start</button></div><div class="config-row" style="flex-wrap:wrap;gap:8px;"><span id="configLabel">PlayCraft PC-7 (demo config)</span><button class="config-btn" id="btnDemandUp">&#128202; Upload Demand Plan&hellip;</button><button class="config-btn" id="btnRestore">Restore backup&hellip;</button><button class="config-btn" id="btnLoadConfig">Load site config&hellip;</button><input type="file" id="fileConfig" accept=".json"><input type="file" id="fileRestore" accept=".json"><input type="file" id="fileDemand" accept=".csv,.txt"></div>
+    <div id="demandStatus" style="font-size:12.5px;color:var(--muted);margin-top:8px;"></div>
+    <span class="section-label"><span class="step-num">1</span>Count Mode</span>
+    <div class="mode-pick">
+      <button class="mode-pick-btn active" id="modeFyt" data-m="fyt"><div class="mt">System Mode</div><div class="md">System data &middot; validate racks</div></button>
+      <button class="mode-pick-btn" id="modeBlind" data-m="blind"><div class="mt">Blind Count</div><div class="md">Blind &middot; count by bin</div></button>
+    </div>
+    <div id="uploadSection">
+      <span class="section-label"><span class="step-num">2</span>Load Today's System Export</span>
+      <div class="upload-grid" id="uploadGrid"></div>
+    </div>
+    <span class="section-label"><span class="step-num" id="stepCounter">3</span>Counter &amp; Start Time</span>
+    <div class="field-row"><div class="field"><input type="text" id="counterName" placeholder="Your name"></div><div class="field"><input type="text" id="startTime"></div></div>
+    <span class="section-label"><span class="step-num" id="stepFam">4</span>Which Family To Start?</span>
+    <div class="fam-toggle" id="famToggle"></div>
+    <button class="start-btn" id="btnStart" disabled>Start Today's Counts</button>
+  </div>
+</div>
+
+<div id="countScreen" style="display:none">
+  <div class="brandbar">
+    <div class="wm"><div class="wm-mark">ow</div><div class="wm-text">PlayCraft Inventory Count</div></div>
+    <div class="ctx">
+      <div class="ctx-item"><span class="k">Family</span><span class="v" id="ctxFam">&mdash;</span></div>
+      <div class="ctx-item"><span class="k">Mode</span><span class="v" id="ctxMode">&mdash;</span></div>
+      <span id="transitStatus" style="display:none;font-size:11px;font-family:var(--mono);color:#0A2A66;background:#EAF0FB;border:1px solid #C7D6F0;border-radius:14px;padding:4px 10px;margin-right:8px;align-self:center;"></span><div class="top-actions"><button class="rec-top-btn" id="btnRecTop">+ Reception</button><button class="rec-top-btn" id="btnTransit">&#8635; Transit</button><input type="file" id="fileTransit" accept=".csv,.txt" style="display:none"><button class="fam-switch" id="btnFamMgr" style="display:none">Family &#9662;</button></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="tabs" id="tabs"></div>
+    <div class="walk-bar" id="walkBar" style="display:none"><span>&#129517;</span><span class="wb-next" id="walkNext"></span><button class="wb-go" id="walkGo">Go &rarr;</button><button class="wb-list" id="walkList">List</button><span class="wb-prog" id="walkProg"></span></div>
+    <div id="countSection" style="display:none">
+      <div id="machinePickWrap">
+        <div class="field-row" id="machinePickRow">
+          <div class="field"><label id="locLabel">Machine</label><select id="locSelect"><option value="">&mdash; Select &mdash;</option></select></div>
+          <div class="field" id="binField" style="display:none"><label>Bin</label><select id="binSelect"><option value="">&mdash; Select Bin &mdash;</option></select></div>
+        </div>
+        <div id="machineLocked" class="machine-lock" style="display:none"><div><div class="ml" id="machineLockedName">&mdash;</div><div class="ml-sub">Locked &mdash; tap material to count</div></div><button class="ml-change" id="btnEmpty" style="margin-right:10px;">No material here</button><button class="ml-change" id="btnChangeMachine">Change</button></div>
+      </div>
+      <div id="matSection" style="display:none">
+        <label style="display:block;margin-bottom:8px;">Material</label>
+        <div class="mat-tiles" id="matTiles"></div>
+        <div class="qty-block">
+          <div class="qty-lbl" id="qtyLbl">Quantity</div>
+          <div class="unit-toggle" id="unitToggle" style="display:none"><button class="ut-btn active" id="utUnits" data-u="units">Tubs</button><button class="ut-btn" id="utConv" data-u="conv">KG</button></div>
+          <div id="stepperWrap"><div class="qty-controls">
+            <button class="qbig neg" id="btnMinus1"><span class="qbtxt">&minus;1</span><span class="qbnum" id="unitA">unit</span></button>
+            <button class="qsm" id="btnMinusQ">&minus;&frac14;</button><div class="qty-display" id="qtyDisplay">0.00</div><button class="qsm" id="btnPlusQ">+&frac14;</button>
+            <button class="qbig" id="btnPlus1"><span class="qbtxt">+1</span><span class="qbnum" id="unitB">unit</span></button>
+          </div></div>
+          <div id="typedWrap" class="qty-typed" style="display:none"><input type="number" id="typedQty" step="0.01" min="0" placeholder="0"></div>
+          <div class="conv-readout" id="convReadout"></div>
+        </div>
+        <div class="field" style="margin-bottom:1rem;"><label>Note (Optional)</label><input type="text" id="noteInput" placeholder="Partial pallet, label unreadable..."></div>
+        <div id="warnBox" class="warn-box" style="display:none"><span>&#9888;</span><span id="warnText"></span></div>
+        <div class="btn-row"><button class="btn-log" id="btnLog">Log Count</button><button class="btn-sec" id="btnResetFields">Clear</button></div>
+      </div>
+      <div id="matPrompt" style="color:var(--muted);font-size:13px;padding:10px 0;">Select a location above to see materials.</div>
+    </div>
+    <div id="rackSection" style="display:none">
+      <div class="rack-area-row">
+        <div class="field"><label>Rack Area (CODALM)</label><select id="rackAreaSelect"><option value="">&mdash; Select Area &mdash;</option></select></div>
+        <div class="field"><label>Bin (CODHUE)</label><select id="rackBinSelect" disabled><option value="">&mdash; All Bins &mdash;</option></select></div>
+      </div>
+      <div id="coverBanner"></div>
+      <div class="age-legend" id="ageLegend"></div>
+      <button class="add-loc-btn" id="btnMatchAll" style="display:none;border-color:#2E7D32;background:#E8F5E9;color:#1B5E20;">&#10003; Match all pending in this area</button>
+      <button class="add-loc-btn" id="btnAddLoc" style="display:none">+ Add Tub Not In System (found on floor)</button>
+      <div class="add-loc-panel" id="addLocPanel" style="display:none">
+        <div class="field-row"><div class="field"><label>Bin</label><input type="text" id="addBin" list="addBinList" placeholder="e.g. 716A"><datalist id="addBinList"></datalist></div><div class="field"><label>Product</label><select id="addProd"><option value="">&mdash; Select &mdash;</option></select></div></div>
+        <div class="qty-block" style="margin-bottom:10px;"><div class="qty-lbl">Observed Quantity</div><div class="unit-toggle"><button class="ut-btn active" id="addUtUnits" data-u="units">Tubs</button><button class="ut-btn" id="addUtConv" data-u="conv">KG</button></div><div id="addKgWrap" style="display:none"><input type="number" id="addKg" step="0.1" min="0" placeholder="kg from tag" style="width:100%;height:40px;font-size:16px;padding:0 10px;"></div><div class="qty-controls" id="addStepWrap"><button class="qbig neg" id="addMinus1"><span class="qbtxt">&minus;1</span></button><button class="qsm" id="addMinusQ">&minus;&frac14;</button><div class="qty-display" id="addQtyDisp">0.00</div><button class="qsm" id="addPlusQ">+&frac14;</button><button class="qbig" id="addPlus1"><span class="qbtxt">+1</span></button></div><div class="conv-readout" id="addReadout"></div></div>
+        <div class="btn-row"><button class="btn-log" id="btnAddSave">Add To Count</button><button class="btn-sec" id="btnAddCancel">Cancel</button></div>
+      </div>
+      <div id="fytTable"><div class="rack-empty">Select a rack area to see today's system contents.</div></div>
+    </div>
+  </div>
+  <div class="log-card">
+    <div class="log-header">
+      <div class="log-title">Session Log &mdash; <span id="logFamLbl"></span><span class="save-ind" id="saveInd"></span></div>
+      <div class="log-actions">
+        <div class="log-row log-row1">
+          <button class="mini-btn undo" id="btnUndo">&#8630; Undo Last</button>
+          <button class="mini-btn nb" id="btnBack">&larr; New Session</button>
+          <button class="mini-btn" id="btnBackup">&#128190; Backup</button>
+          <button class="mini-btn" id="btnPrint">&#128424; Print Sheet</button>
+          <button class="mini-btn danger" id="btnClear">Clear</button>
+        </div>
+        <div class="log-row log-row2">
+          <button class="mini-btn" id="btnDos" style="background:var(--navy);color:#fff;border-color:var(--navy);">&#128202; Days of Stock</button>
+          <button class="mini-btn" id="btnReco">&#8646; System vs Actual</button>
+          <button class="mini-btn" id="btnNif" style="border-color:#0D47A1;color:#0D47A1;">&#9873; System Fixes</button>
+          <button class="mini-btn" id="btnExport">&#8681; <span id="expLbl">Full CSV</span></button>
+          <button class="mini-btn" id="btnExportMMRP">&#8681; Inventory Total</button>
+          <button class="mini-btn" id="btnPlanExp" style="border-color:#0E3139;color:#0E3139;font-weight:600;">&#8681; Planning CSV</button>
+        </div>
+      </div>
+    </div>
+    <div class="summary-row" id="summaryRow" style="display:none"></div>
+    <div class="window-line" id="windowLine" style="display:none"></div>
+    <table class="log-table"><colgroup><col style="width:10%"><col style="width:19%"><col style="width:13%"><col style="width:11%"><col style="width:12%"><col style="width:18%"><col style="width:11%"><col style="width:6%"></colgroup>
+      <thead><tr><th>Time</th><th>Where</th><th>ML#</th><th>Units</th><th id="convHead">Conv</th><th>Detail</th><th>Type</th><th></th></tr></thead>
+      <tbody id="logBody"><tr><td colspan="8"><div class="empty-state">No entries yet.</div></td></tr></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<div class="modal-overlay" id="recModal"><div class="modal"><div class="modal-head"><span class="mh-title">Add Reception (Dock / Trailer)</span><button class="modal-close" id="recModalClose">&times;</button></div>
+  <div class="modal-body">
+    <div class="field" style="margin-bottom:.6rem;"><label>BOL / Trailer #</label><div style="display:flex;gap:8px;"><input type="text" id="recBOL" placeholder="type trailer # or BOL" style="flex:1;"><button class="btn-sec" id="btnLoadLookup" style="white-space:nowrap;">&#128269; Find load</button></div></div>
+    <div class="field" style="margin-bottom:.6rem;"><label>This trailer is <span style="font-weight:400;color:var(--muted);">(on-the-road &amp; received are automatic)</span></label><div class="unit-toggle" id="recStatusToggle"><button class="ut-btn active" data-s="YARD">On the yard</button><button class="ut-btn" data-s="UNLOADING">Unloading</button></div></div>
+    <div id="loadResult" style="display:none;background:#EAF0FB;border:1px solid #C7D6F0;border-radius:10px;padding:12px;margin-bottom:1rem;font-size:13px;"></div>
+    <label style="display:block;margin-bottom:8px;">Quality (Material) &mdash; <span id="recFamLbl"></span></label>
+    <div class="mat-tiles" id="recTiles"></div>
+    <div class="qty-block"><div class="qty-lbl">Quantity Received</div><div class="unit-toggle"><button class="ut-btn active" id="recUtUnits" data-u="units">Tubs</button><button class="ut-btn" id="recUtConv" data-u="conv">KG</button></div><div class="qty-typed"><input type="number" id="recQty" step="0.01" min="0" placeholder="0"></div><div class="conv-readout" id="recReadout"></div></div>
+    <div class="btn-row"><button class="btn-log" id="btnRecLog">Add Reception</button><button class="btn-sec" id="btnRecClear">Clear</button></div>
+  </div></div></div>
+
+<div class="modal-overlay" id="dosModal"><div class="modal" style="max-width:640px;"><div class="modal-head"><span class="mh-title">Days of Stock</span><button class="modal-close" id="dosClose">&times;</button></div>
+    <div class="modal-body" id="dosBody" style="max-height:56vh;overflow-y:auto;"></div>
+    <div style="padding:10px 18px 18px;display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-log" id="dosEmail" style="flex:1;min-width:130px;">&#9993; Email critical</button><button class="btn-sec" id="dosPrint">&#128424; Print</button><button class="btn-sec" id="dosCsv">&#8681; CSV</button><button class="btn-sec" id="dosResetBtn">Reset dmd</button></div></div></div>
+<div class="modal-overlay" id="nifModal"><div class="modal" style="max-width:600px;"><div class="modal-head"><span class="mh-title">System Corrections</span><button class="modal-close" id="nifClose">&times;</button></div>
+    <div class="modal-body" id="nifBody"></div>
+    <div style="padding:0 18px 18px;display:flex;gap:8px;"><button class="btn-log" id="nifPrint" style="flex:1;">&#128424; Print</button><button class="btn-sec" id="nifCsv">&#8681; CSV</button></div></div></div>
+<div class="modal-overlay" id="famModal"><div class="modal"><div class="modal-head"><span class="mh-title">Families &mdash; switch or add</span><button class="modal-close" id="famModalClose">&times;</button></div><div class="modal-body" id="famModalBody"></div>
+    <input type="file" id="famUploadFile" accept=".csv,.txt" style="display:none"></div></div>
+<div class="modal-overlay" id="walkModal"><div class="modal"><div class="modal-head"><span class="mh-title">Walk Path</span><button class="modal-close" id="walkModalClose">&times;</button></div><div class="modal-body" id="walkModalBody" style="max-height:62vh;overflow-y:auto;padding:6px 18px;"></div></div></div>
+<div class="modal-overlay" id="recoModal"><div class="modal" style="max-width:640px;"><div class="modal-head"><span class="mh-title">System vs Actual</span><button class="modal-close" id="recoClose">&times;</button></div>
+  <div style="padding:8px 18px 0;"><div class="unit-toggle" style="display:inline-flex;"><button class="ut-btn active" id="recoMatBtn">By Material</button><button class="ut-btn" id="recoAreaBtn">By Area</button><button class="ut-btn" id="recoTblBtn">Table</button></div></div>
+  <div class="modal-body" id="recoBody"></div>
+  <div style="padding:0 18px 18px;"><button class="btn-sec" id="recoExport" style="width:100%;">&#8681; Download reconciliation CSV</button></div>
+</div></div>
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var CONFIG = {"site":"PlayCraft PC-7","families":[{"id":"DOUGH","label":"Dough Compound","unit":"tub","unitPlural":"tubs","convUnit":"kg","machines":["MIX01","MIX02","MIX03","MIX04","MIX05","EXT1","EXT2","EXT3","KNEAD1","KNEAD2"],"standards":{"DGH-RED":14.0,"DGH-ORG":11.5,"DGH-YEL":15.0,"DGH-LIM":22.0,"DGH-GRN":9.0,"DGH-TEA":10.0,"DGH-SKY":18.0,"DGH-BLU":10.0,"DGH-NVY":14.0,"DGH-PUR":20.0,"DGH-MAG":9.0,"DGH-PNK":18.0,"DGH-BRN":12.0,"DGH-GRY":9.0,"DGH-WHT":10.0,"DGH-BLK":15.0,"DGH-GLD":15.0},"rackKey":{"DRY-A":["DA01","DA02","DA03","DA04","DA05","DA06","DA07","DA08","DA09","DA10"],"DRY-B":["DB01","DB02","DB03","DB04","DB05","DB06","DB07","DB08","DB09","DB10"],"DRY-C":["DC01","DC02","DC03","DC04","DC05","DC06","DC07","DC08"],"COLD1":["C101","C102","C103","C104","C105","C106"],"COLD2":["C201","C202","C203","C204","C205","C206"],"STG-N":["SN01","SN02","SN03","SN04","SN05","SN06","SN07","SN08"],"STG-S":["SS01","SS02","SS03","SS04","SS05","SS06","SS07","SS08"],"MIXLINE":["MX01","MX02","MX03","MX04","MX05","MX06"]},"walkPath":[{"t":"rack","c":"DRY-A"},{"t":"rack","c":"DRY-B"},{"t":"rack","c":"DRY-C"},{"t":"rack","c":"COLD1"},{"t":"machine","c":"MIX01"},{"t":"machine","c":"MIX02"},{"t":"machine","c":"MIX03"},{"t":"machine","c":"MIX04"},{"t":"machine","c":"MIX05"},{"t":"machine","c":"EXT1"},{"t":"machine","c":"EXT2"},{"t":"machine","c":"EXT3"},{"t":"machine","c":"KNEAD1"},{"t":"machine","c":"KNEAD2"},{"t":"rack","c":"COLD2"},{"t":"rack","c":"STG-N"},{"t":"rack","c":"STG-S"},{"t":"rack","c":"MIXLINE"}],"demand":{"DGH-RED":3.96,"DGH-ORG":4.54,"DGH-YEL":13.89,"DGH-LIM":25.15,"DGH-GRN":5.47,"DGH-TEA":8.25,"DGH-SKY":19.57,"DGH-BLU":28.54,"DGH-NVY":18.16,"DGH-PUR":13.11,"DGH-MAG":29.34,"DGH-PNK":3.3,"DGH-BRN":26.04,"DGH-GRY":10.11,"DGH-WHT":6.04,"DGH-BLK":5.3,"DGH-GLD":10.64}},{"id":"WRAP","label":"Packaging Film","unit":"roll","unitPlural":"rolls","convUnit":"m\u00b2","machines":["PACK1","PACK2","PACK3","LABEL1","SEAL1"],"standards":{"WRP-CLR":120,"WRP-MAT":110,"WRP-FOIL":140,"WRP-KRAFT":180,"WRP-PRT1":110,"WRP-PRT2":110,"WRP-BIO":90,"WRP-SHRINK":140},"rackKey":{"WRAP-A":["WA01","WA02","WA03","WA04","WA05","WA06","WA07","WA08","WA09","WA10"],"WRAP-B":["WB01","WB02","WB03","WB04","WB05","WB06","WB07","WB08"],"FILM-STG":["FS01","FS02","FS03","FS04","FS05","FS06"]},"walkPath":[{"t":"rack","c":"WRAP-A"},{"t":"machine","c":"PACK1"},{"t":"machine","c":"PACK2"},{"t":"machine","c":"PACK3"},{"t":"machine","c":"LABEL1"},{"t":"machine","c":"SEAL1"},{"t":"rack","c":"WRAP-B"},{"t":"rack","c":"FILM-STG"}],"demand":{"WRP-CLR":21.37,"WRP-MAT":22.67,"WRP-FOIL":31.76,"WRP-KRAFT":20.23,"WRP-PRT1":37.17,"WRP-PRT2":16.38,"WRP-BIO":12.19,"WRP-SHRINK":9.65}}],"excludeAreas":[],"excludeMaterials":[],"aging":{"enabled":true,"yellowDays":21,"redDays":45,"note":"days since manufacture; demo values.","perProduct":{}},"fytColumns":{"locType":"TIPALM","area":"CODALM","bin":"CODHUE","product":"REPERE","sysUnits":"CANIDO","sysQty":"CANTIDAD","mfgDate":"FECFAB"},"locationTypes":{"rack":"CO","staging":"SA","machine":"QU"},"dateFormat":"MM/DD/YYYY","dos":{"critical":1,"watch":3,"note":"demo thresholds: red<1 day, yellow<3 days"},"emailTo":""}
+var DEMO_FYT = {"DOUGH":[{"tipalm":"CO","area":"DRY-A","bin":"DA02","prod":"DGH-PUR","canido":3,"cantidad":60.0,"fecfab":"07/13/2026 00:00"},{"tipalm":"CO","area":"DRY-A","bin":"DA05","prod":"DGH-YEL","canido":0.5,"cantidad":7.5,"fecfab":"07/12/2026 00:00"},{"tipalm":"CO","area":"DRY-A","bin":"DA06","prod":"DGH-MAG","canido":0.75,"cantidad":6.8,"fecfab":"06/15/2026 00:00"},{"tipalm":"CO","area":"DRY-A","bin":"DA07","prod":"DGH-ORG","canido":0.5,"cantidad":5.8,"fecfab":"06/26/2026 00:00"},{"tipalm":"CO","area":"DRY-B","bin":"DB01","prod":"DGH-PNK","canido":4,"cantidad":72.0,"fecfab":"07/13/2026 00:00"},{"tipalm":"CO","area":"DRY-B","bin":"DB03","prod":"DGH-YEL","canido":1,"cantidad":15.0,"fecfab":"07/14/2026 00:00"},{"tipalm":"CO","area":"DRY-B","bin":"DB05","prod":"DGH-PUR","canido":4,"cantidad":80.0,"fecfab":"07/01/2026 00:00"},{"tipalm":"CO","area":"DRY-B","bin":"DB07","prod":"DGH-BRN","canido":1,"cantidad":12.0,"fecfab":"08/12/2026 00:00"},{"tipalm":"CO","area":"DRY-B","bin":"DB09","prod":"DGH-LIM","canido":2,"cantidad":44.0,"fecfab":"08/10/2026 00:00"},{"tipalm":"CO","area":"DRY-B","bin":"DB10","prod":"DGH-PUR","canido":0.75,"cantidad":15.0,"fecfab":"06/27/2026 00:00"},{"tipalm":"CO","area":"DRY-C","bin":"DC01","prod":"DGH-BRN","canido":2,"cantidad":24.0,"fecfab":"08/08/2026 00:00"},{"tipalm":"CO","area":"DRY-C","bin":"DC02","prod":"DGH-BRN","canido":3,"cantidad":36.0,"fecfab":"07/27/2026 00:00"},{"tipalm":"CO","area":"DRY-C","bin":"DC06","prod":"DGH-GRY","canido":1,"cantidad":9.0,"fecfab":"07/01/2026 00:00"},{"tipalm":"CO","area":"COLD1","bin":"C101","prod":"DGH-TEA","canido":0.75,"cantidad":7.5,"fecfab":"07/30/2026 00:00"},{"tipalm":"CO","area":"COLD1","bin":"C103","prod":"DGH-TEA","canido":1,"cantidad":10.0,"fecfab":"07/26/2026 00:00"},{"tipalm":"CO","area":"COLD1","bin":"C104","prod":"DGH-GRY","canido":3,"cantidad":27.0,"fecfab":"07/21/2026 00:00"},{"tipalm":"CO","area":"COLD1","bin":"C106","prod":"DGH-GRN","canido":3,"cantidad":27.0,"fecfab":"07/05/2026 00:00"},{"tipalm":"CO","area":"COLD2","bin":"C203","prod":"DGH-BRN","canido":2,"cantidad":24.0,"fecfab":"07/19/2026 00:00"},{"tipalm":"CO","area":"COLD2","bin":"C204","prod":"DGH-BLK","canido":2,"cantidad":30.0,"fecfab":"08/10/2026 00:00"},{"tipalm":"CO","area":"COLD2","bin":"C205","prod":"DGH-SKY","canido":2,"cantidad":36.0,"fecfab":"08/03/2026 00:00"},{"tipalm":"CO","area":"COLD2","bin":"C206","prod":"DGH-ORG","canido":0.5,"cantidad":5.8,"fecfab":"08/13/2026 00:00"},{"tipalm":"CO","area":"STG-N","bin":"SN02","prod":"DGH-PNK","canido":4,"cantidad":72.0,"fecfab":"08/12/2026 00:00"},{"tipalm":"CO","area":"STG-N","bin":"SN03","prod":"DGH-SKY","canido":4,"cantidad":72.0,"fecfab":"07/20/2026 00:00"},{"tipalm":"CO","area":"STG-N","bin":"SN04","prod":"DGH-NVY","canido":1,"cantidad":14.0,"fecfab":"07/06/2026 00:00"},{"tipalm":"CO","area":"STG-N","bin":"SN05","prod":"DGH-LIM","canido":0.5,"cantidad":11.0,"fecfab":"06/20/2026 00:00"},{"tipalm":"CO","area":"STG-N","bin":"SN06","prod":"DGH-WHT","canido":2,"cantidad":20.0,"fecfab":"07/14/2026 00:00"},{"tipalm":"CO","area":"STG-N","bin":"SN07","prod":"DGH-GRN","canido":0.5,"cantidad":4.5,"fecfab":"06/27/2026 00:00"},{"tipalm":"CO","area":"STG-N","bin":"SN08","prod":"DGH-NVY","canido":2,"cantidad":28.0,"fecfab":"06/21/2026 00:00"},{"tipalm":"CO","area":"STG-S","bin":"SS02","prod":"DGH-SKY","canido":3,"cantidad":54.0,"fecfab":"07/21/2026 00:00"},{"tipalm":"CO","area":"STG-S","bin":"SS03","prod":"DGH-RED","canido":3,"cantidad":42.0,"fecfab":"07/25/2026 00:00"},{"tipalm":"CO","area":"STG-S","bin":"SS07","prod":"DGH-PNK","canido":0.75,"cantidad":13.5,"fecfab":"07/22/2026 00:00"},{"tipalm":"CO","area":"MIXLINE","bin":"MX01","prod":"DGH-GLD","canido":1,"cantidad":15.0,"fecfab":"07/04/2026 00:00"},{"tipalm":"CO","area":"MIXLINE","bin":"MX02","prod":"DGH-SKY","canido":1,"cantidad":18.0,"fecfab":"06/22/2026 00:00"},{"tipalm":"CO","area":"MIXLINE","bin":"MX03","prod":"DGH-BLU","canido":1,"cantidad":10.0,"fecfab":"07/11/2026 00:00"},{"tipalm":"CO","area":"MIXLINE","bin":"MX04","prod":"DGH-RED","canido":0.25,"cantidad":3.5,"fecfab":"06/24/2026 00:00"},{"tipalm":"CO","area":"MIXLINE","bin":"MX05","prod":"DGH-NVY","canido":1,"cantidad":14.0,"fecfab":"06/30/2026 00:00"},{"tipalm":"SA","area":"MIX01","bin":"---","prod":"DGH-WHT","canido":3,"cantidad":30.0,"fecfab":"07/21/2026 00:00"},{"tipalm":"SA","area":"EXT1","bin":"---","prod":"DGH-SKY","canido":3,"cantidad":54.0,"fecfab":"07/31/2026 00:00"},{"tipalm":"SA","area":"EXT2","bin":"---","prod":"DGH-RED","canido":5,"cantidad":70.0,"fecfab":"07/22/2026 00:00"},{"tipalm":"SA","area":"EXT3","bin":"---","prod":"DGH-YEL","canido":1,"cantidad":15.0,"fecfab":"07/20/2026 00:00"},{"tipalm":"SA","area":"EXT3","bin":"---","prod":"DGH-SKY","canido":5,"cantidad":90.0,"fecfab":"08/02/2026 00:00"},{"tipalm":"SA","area":"KNEAD1","bin":"---","prod":"DGH-MAG","canido":1,"cantidad":9.0,"fecfab":"07/19/2026 00:00"},{"tipalm":"SA","area":"KNEAD2","bin":"---","prod":"DGH-BRN","canido":1,"cantidad":12.0,"fecfab":"08/03/2026 00:00"}],"WRAP":[{"tipalm":"CO","area":"WRAP-A","bin":"WA01","prod":"WRP-FOIL","canido":0.25,"cantidad":35.0,"fecfab":"08/04/2026 00:00"},{"tipalm":"CO","area":"WRAP-A","bin":"WA03","prod":"WRP-FOIL","canido":4,"cantidad":560,"fecfab":"06/22/2026 00:00"},{"tipalm":"CO","area":"WRAP-A","bin":"WA05","prod":"WRP-PRT2","canido":0.75,"cantidad":82.5,"fecfab":"07/09/2026 00:00"},{"tipalm":"CO","area":"WRAP-A","bin":"WA06","prod":"WRP-CLR","canido":0.25,"cantidad":30.0,"fecfab":"06/23/2026 00:00"},{"tipalm":"CO","area":"WRAP-A","bin":"WA09","prod":"WRP-FOIL","canido":2,"cantidad":280,"fecfab":"06/19/2026 00:00"},{"tipalm":"CO","area":"WRAP-A","bin":"WA10","prod":"WRP-KRAFT","canido":0.25,"cantidad":45.0,"fecfab":"07/28/2026 00:00"},{"tipalm":"CO","area":"WRAP-B","bin":"WB01","prod":"WRP-KRAFT","canido":4,"cantidad":720,"fecfab":"07/24/2026 00:00"},{"tipalm":"CO","area":"WRAP-B","bin":"WB02","prod":"WRP-BIO","canido":0.75,"cantidad":67.5,"fecfab":"08/10/2026 00:00"},{"tipalm":"CO","area":"WRAP-B","bin":"WB04","prod":"WRP-SHRINK","canido":4,"cantidad":560,"fecfab":"06/22/2026 00:00"},{"tipalm":"CO","area":"WRAP-B","bin":"WB06","prod":"WRP-FOIL","canido":3,"cantidad":420,"fecfab":"08/04/2026 00:00"},{"tipalm":"CO","area":"WRAP-B","bin":"WB07","prod":"WRP-CLR","canido":2,"cantidad":240,"fecfab":"06/25/2026 00:00"},{"tipalm":"CO","area":"WRAP-B","bin":"WB08","prod":"WRP-CLR","canido":0.75,"cantidad":90.0,"fecfab":"08/02/2026 00:00"},{"tipalm":"CO","area":"FILM-STG","bin":"FS01","prod":"WRP-MAT","canido":3,"cantidad":330,"fecfab":"08/10/2026 00:00"},{"tipalm":"CO","area":"FILM-STG","bin":"FS02","prod":"WRP-SHRINK","canido":0.5,"cantidad":70.0,"fecfab":"06/18/2026 00:00"},{"tipalm":"CO","area":"FILM-STG","bin":"FS04","prod":"WRP-PRT1","canido":0.25,"cantidad":27.5,"fecfab":"06/25/2026 00:00"},{"tipalm":"CO","area":"FILM-STG","bin":"FS05","prod":"WRP-SHRINK","canido":3,"cantidad":420,"fecfab":"08/12/2026 00:00"},{"tipalm":"SA","area":"PACK2","bin":"---","prod":"WRP-PRT2","canido":2,"cantidad":220,"fecfab":"07/27/2026 00:00"},{"tipalm":"SA","area":"PACK3","bin":"---","prod":"WRP-SHRINK","canido":2,"cantidad":280,"fecfab":"07/11/2026 00:00"},{"tipalm":"SA","area":"LABEL1","bin":"---","prod":"WRP-KRAFT","canido":5,"cantidad":900,"fecfab":"08/05/2026 00:00"},{"tipalm":"SA","area":"SEAL1","bin":"---","prod":"WRP-MAT","canido":4,"cantidad":440,"fecfab":"07/16/2026 00:00"}]};
+var SAVE_KEY = 'daily_count_session_v9';
+
+// ===== Build runtime tables from CONFIG =====
+var DATA={}, RACK_KEY={}, EXCLUDE_AREAS, EXCLUDE_MATERIALS, FAM_IDS=[], FAM_LABEL={}, FYTCOL, LOCT, AGING;
+function buildFromConfig(){
+  DATA={}; RACK_KEY={}; FAM_IDS=[]; FAM_LABEL={};
+  CONFIG.families.forEach(function(f){
+    DATA[f.id]={machines:f.machines||[],materials:Object.keys(f.standards||{}).filter(function(k){return k!=null&&String(k).trim()!==''&&String(k).trim()!=='\u2014'&&String(k).trim()!=='-';}),unit:f.unit,unitPlural:f.unitPlural,convUnit:f.convUnit,std:f.standards||{}};
+    RACK_KEY[f.id]=f.rackKey||{};
+    FAM_IDS.push(f.id); FAM_LABEL[f.id]=f.label||f.id;
+  });
+  EXCLUDE_AREAS=new Set(CONFIG.excludeAreas||[]);
+  EXCLUDE_MATERIALS=new Set(CONFIG.excludeMaterials||[]);
+  FYTCOL=CONFIG.fytColumns||{locType:'TIPALM',area:'CODALM',bin:'CODHUE',product:'REPERE',sysUnits:'CANIDO',sysQty:'CANTIDAD',mfgDate:'FECFAB'};
+  LOCT=CONFIG.locationTypes||{rack:'CO',staging:'SA',machine:'QU'};
+  AGING=CONFIG.aging||{enabled:false};
+}
+buildFromConfig();
+
+var $=function(id){return document.getElementById(id);};
+var now=new Date(), dateStr=(function(d){function p(n){return(n<10?'0':'')+n;}return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());})(now);
+$('startTime').value=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+var fmt=function(n){return parseFloat(n).toLocaleString('en-US',{maximumFractionDigits:2});};
+var nf=function(n){return Math.round(n*100)/100;};
+var natCmp=function(a,b){return String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'});};
+function walkPathList(){ var f=CONFIG.families.filter(function(x){return x.id===activeFamily;})[0]; return (f&&f.walkPath)?f.walkPath:[]; }
+function walkRank(code){ var wp=walkPathList(); for(var i=0;i<wp.length;i++){ if(wp[i].c===code) return i; } return 99999; }
+function walkSort(a,b){ var ra=walkRank(a),rb=walkRank(b); if(ra!==rb) return ra-rb; return natCmp(a,b); }
+
+var appMode='fyt',activeFamily=null,startFamily=null,counter='',startTime='';
+var tab='count',qty=0,entryUnit='units',addQty=0;
+var entries=[],seq=0;
+var selectedMat=null,selectedLoc=null,selectedBin=null;
+var rackStatus={},fytData={};
+var recUnit='units',recSelMat=null;
+FAM_IDS.forEach(function(id){fytData[id]=[];});
+
+// ===== AGE (FECFAB -> days) =====
+function parseMfg(s){
+  if(!s) return null; s=(''+s).trim(); if(!s) return null;
+  // MM/DD/YYYY [HH:MM[:SS]]
+  var m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m){var d=new Date(+m[3],+m[1]-1,+m[2],+(m[4]||0),+(m[5]||0),+(m[6]||0)); if(!isNaN(d)) return d;}
+  var t=Date.parse(s); if(!isNaN(t)) return new Date(t);
+  return null;
+}
+function ageDays(fecfab){var d=parseMfg(fecfab); if(!d) return null; return Math.floor((now-d)/86400000);}
+function ageFlag(prod,fecfab){
+  if(!AGING||!AGING.enabled) return null;
+  var a=ageDays(fecfab); if(a==null) return null;
+  var y=AGING.yellowDays, r=AGING.redDays;
+  if(AGING.perProduct&&AGING.perProduct[prod]){var pp=AGING.perProduct[prod]; if(pp.yellowDays!=null)y=pp.yellowDays; if(pp.redDays!=null)r=pp.redDays;}
+  if(r!=null&&a>=r) return {level:'r',days:a};
+  if(y!=null&&a>=y) return {level:'y',days:a};
+  return {level:null,days:a};
+}
+
+// ===== AUTO-SAVE =====
+var saveOK=true;
+function saveSession(){ try{recordFixes();}catch(e){}
+  if(!saveOK||!activeFamily) return;
+  try{
+    var payload={v:9,date:dateStr,appMode:appMode,activeFamily:activeFamily,counter:counter,startTime:startTime,
+      entries:entries,rackStatus:rackStatus,seq:seq,fytData:fytData,transit:transitData,transitLoads:transitLoads,transitMeta:transitMeta,machineComplete:machineComplete,savedAt:new Date().toISOString()};
+    localStorage.setItem(SAVE_KEY,JSON.stringify(payload));
+    $('saveInd').textContent='&#10003; saved'; $('saveInd').innerHTML='&#10003; saved';
+  }catch(e){ saveOK=false; $('saveInd').textContent=''; }
+}
+function loadSaved(){ try{var r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null;}catch(e){return null;} }
+function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} }
+
+// ===== START SCREEN BUILD (config-driven) =====
+function buildStartUI(){
+  $('brandTitle').textContent=(CONFIG.site||'')+' Daily Count';
+  $('configLabel').textContent='Config: '+(CONFIG.site||'custom')+(CONFIG._loaded?' (loaded)':' (built in)');
+  var ug=$('uploadGrid'); ug.innerHTML='';
+  var ft=$('famToggle'); ft.innerHTML='';
+  CONFIG.families.forEach(function(f){
+    var z=document.createElement('div'); z.className='upload-zone'; z.id='zone_'+f.id;
+    z.innerHTML='<input type="file" id="file_'+f.id+'" accept=".csv,.txt"><div class="upload-icon">&#8682;</div><div class="upload-title">'+f.label+' System</div><div class="upload-sub" id="sub_'+f.id+'">Tap to upload</div>';
+    ug.appendChild(z);
+    var b=document.createElement('button'); b.className='fam-btn'; b.id='fam_'+f.id; b.setAttribute('data-fam',f.id); b.disabled=true;
+    b.innerHTML='<div class="fn">'+f.label.toUpperCase()+'</div><div class="fd">'+f.unitPlural+' &rarr; '+f.convUnit.toUpperCase()+'</div>';
+    b.onclick=function(){ if(b.disabled) return; document.querySelectorAll('.fam-btn').forEach(function(x){x.classList.remove('active');}); b.classList.add('active'); startFamily=f.id; checkStartReady(); };
+    ft.appendChild(b);
+  });
+  CONFIG.families.forEach(function(f){ wireUpload('zone_'+f.id,'file_'+f.id,f.id,'sub_'+f.id,'fam_'+f.id); });
+}
+
+document.querySelectorAll('.mode-pick-btn').forEach(function(b){b.onclick=function(){
+  document.querySelectorAll('.mode-pick-btn').forEach(function(x){x.classList.remove('active');});
+  b.classList.add('active'); appMode=b.dataset.m;
+  $('uploadSection').style.display=appMode==='fyt'?'':'none';
+  $('stepCounter').textContent=appMode==='fyt'?'3':'2'; $('stepFam').textContent=appMode==='fyt'?'4':'3';
+  FAM_IDS.forEach(function(id){var fb=$('fam_'+id); if(fb) fb.disabled = appMode==='blind'?false:(fytData[id].length===0);});
+  checkStartReady();
+};});
+
+// ===== CONFIG LOAD =====
+$('btnLoadConfig').onclick=function(){$('fileConfig').click();};
+$('fileConfig').onchange=function(){ if(!this.files[0])return; var r=new FileReader();
+  r.onload=function(e){ try{ var c=JSON.parse(e.target.result);
+    if(!c.families||!c.families.length){showToast('Config has no families.');return;}
+    c._loaded=true; CONFIG=c; buildFromConfig(); fytData={}; FAM_IDS.forEach(function(id){fytData[id]=[];});
+    buildStartUI(); startFamily=null; checkStartReady(); showToast('Config loaded: '+(CONFIG.site||'custom'));
+  }catch(err){showToast('Could not read config JSON.');} };
+  r.readAsText(this.files[0]); };
+
+// ===== FYT PARSE =====
+function parseFYT(text){
+  var lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(function(l){return l.trim();});
+  if(!lines.length) return [];
+  var isTab=lines[0].indexOf('\t')>=0;
+  var split=function(l){return isTab?l.split('\t').map(function(f){return f.trim().replace(/^"|"$/g,'');}):l.split(',');};
+  var header=split(lines[0]).map(function(h){return h.replace(/"/g,'').trim();});
+  var idx={}; header.forEach(function(h,i){idx[h]=i;});
+  var ci={t:idx[FYTCOL.locType],a:idx[FYTCOL.area],b:idx[FYTCOL.bin],r:idx[FYTCOL.product],ca:idx[FYTCOL.sysUnits],cd:idx[FYTCOL.sysQty],f:idx[FYTCOL.mfgDate]};
+  var rows=[];
+  for(var i=1;i<lines.length;i++){var f=split(lines[i]); if(f.length<6) continue;
+    var area=(f[ci.a]||'').trim(), rep=(f[ci.r]||'').trim(); if(!area||!rep) continue; if(EXCLUDE_MATERIALS.has(rep)) continue;
+    rows.push({tipalm:(f[ci.t]||'').trim(),area:area,bin:(f[ci.b]||'').trim(),prod:rep,canido:(f[ci.ca]||'').trim(),cantidad:(f[ci.cd]||'').trim(),fecfab:(f[ci.f]||'').trim()});}
+  return rows;
+}
+function wireUpload(zoneId,fileId,fam,subId,famBtnId){
+  var zone=$(zoneId),input=$(fileId); if(!zone||!input) return;
+  zone.onclick=function(){input.click();};
+  zone.ondragover=function(e){e.preventDefault();zone.classList.add('drag');};
+  zone.ondragleave=function(){zone.classList.remove('drag');};
+  zone.ondrop=function(e){e.preventDefault();zone.classList.remove('drag'); if(e.dataTransfer.files[0])rd(e.dataTransfer.files[0]);};
+  input.onchange=function(){if(input.files[0])rd(input.files[0]);};
+  function rd(file){var r=new FileReader(); r.onload=function(e){
+    var rows=parseFYT(e.target.result); fytData[fam]=rows;
+    var co=rows.filter(function(x){return x.tipalm===LOCT.rack;}).length, sa=rows.filter(function(x){return x.tipalm===LOCT.staging;}).length;
+    zone.classList.add('loaded'); zone.querySelector('.upload-icon').innerHTML='&#10003;';
+    $(subId).innerHTML=file.name+'<br>'+rows.length+' rows &middot; '+LOCT.rack+' '+co+' &middot; '+LOCT.staging+' '+sa;
+    if(appMode==='fyt')$(famBtnId).disabled=false; checkStartReady();
+  }; r.readAsText(file); }
+}
+$('counterName').oninput=checkStartReady;
+function checkStartReady(){var ok=appMode==='blind'?true:FAM_IDS.some(function(id){return fytData[id].length>0;});
+  $('btnStart').disabled=!(ok&&$('counterName').value.trim()&&startFamily);}
+
+$('btnStart').onclick=function(){counter=$('counterName').value.trim();startTime=$('startTime').value.trim();activeFamily=startFamily;
+  $('ctxMode').textContent=appMode==='fyt'?'System':'Blind'; buildTabs(); applyFamily();
+  $('startScreen').style.display='none'; $('countScreen').style.display='block'; showTab('count'); saveSession();};
+
+// ===== RESUME =====
+(function initResume(){
+  var s=loadSaved();
+  if(s && s.date===dateStr && s.entries && s.entries.length){
+    $('resumeBanner').style.display='block';
+    $('resumeText').innerHTML='In-progress count found from today &mdash; '+s.entries.length+' entries, started '+(s.startTime||'?')+' ('+(s.activeFamily||'')+').';
+    $('btnResume').onclick=function(){
+      appMode=s.appMode; activeFamily=s.activeFamily; counter=s.counter; startTime=s.startTime;
+      entries=s.entries||[]; rackStatus=s.rackStatus||{}; seq=s.seq||0; fytData=s.fytData||fytData; if(s.transit)transitData=s.transit; if(s.transitLoads)transitLoads=s.transitLoads; if(s.transitMeta)transitMeta=s.transitMeta; if(s.machineComplete)machineComplete=s.machineComplete;
+      $('ctxMode').textContent=appMode==='fyt'?'System':'Blind'; buildTabs(); applyFamily(); try{updateTransitStatus();}catch(e){}
+      $('startScreen').style.display='none'; $('countScreen').style.display='block'; showTab('count'); renderLog();
+      showToast('Session resumed.');
+    };
+    $('btnDiscard').onclick=function(){clearSaved(); $('resumeBanner').style.display='none';};
+  }
+})();
+
+$('btnRestore').onclick=function(){$('fileRestore').click();};
+$('fileRestore').onchange=function(){ if(!this.files[0])return; var r=new FileReader();
+  r.onload=function(e){ try{ var s=JSON.parse(e.target.result);
+    if(!s.entries){showToast('Not a valid backup file.');return;}
+    appMode=s.appMode||'fyt'; activeFamily=s.activeFamily; counter=s.counter||''; startTime=s.startTime||'';
+    entries=s.entries||[]; rackStatus=s.rackStatus||{}; seq=s.seq||0; fytData=s.fytData||fytData; if(s.demand)demandStore=s.demand; if(s.demandPlan){demandPlan=s.demandPlan;savePlan();} if(s.transit)transitData=s.transit; if(s.transitLoads)transitLoads=s.transitLoads; if(s.transitMeta)transitMeta=s.transitMeta; if(s.machineComplete)machineComplete=s.machineComplete; if(s.fixHistory){fixHistory=s.fixHistory;saveFixHist();} try{updateTransitStatus();updateDemandStatus();}catch(e){}
+    $('ctxMode').textContent=appMode==='fyt'?'System':'Blind'; buildTabs(); applyFamily();
+    $('startScreen').style.display='none'; $('countScreen').style.display='block'; showTab('count'); renderLog();
+    showToast('Backup restored ('+entries.length+' entries).');
+  }catch(err){showToast('Could not read backup.');} };
+  r.readAsText(this.files[0]); };
+
+function buildTabs(){var t=$('tabs'); t.innerHTML='';
+  var defs=appMode==='fyt'?[['count','Count Machine / QU'],['rack','Validate Rack ('+LOCT.rack+')']]:[['count','Count Location']];
+  defs.forEach(function(d){var b=document.createElement('button'); b.className='tab-btn'+(d[0]===tab?' active':''); b.setAttribute('data-k',d[0]); b.textContent=d[1]; b.onclick=function(){ if(!guardPending())return; showTab(d[0]);}; t.appendChild(b);});}
+function showTab(k){tab=k; document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-k')===k);});
+  $('countSection').style.display=k==='count'?'':'none'; $('rackSection').style.display=k==='rack'?'':'none'; updateWalkBar();}
+
+function otherFamily(){var i=FAM_IDS.indexOf(activeFamily); return FAM_IDS[(i+1)%FAM_IDS.length];}
+function applyFamily(){var cfg=DATA[activeFamily];
+  $('ctxFam').textContent=FAM_LABEL[activeFamily]; $('logFamLbl').textContent=FAM_LABEL[activeFamily]; $('recFamLbl').textContent=FAM_LABEL[activeFamily];
+  $('unitA').textContent=cfg.unit; $('unitB').textContent=cfg.unit; $('qtyLbl').textContent='Quantity - '+cfg.unit+' equivalents';
+  $('convHead').textContent=cfg.convUnit; $('expLbl').textContent='Full CSV ('+FAM_LABEL[activeFamily]+')';
+  $('locLabel').textContent=appMode==='fyt'?'Machine':'Location';
+  $('utUnits').textContent=cfg.unitPlural.charAt(0).toUpperCase()+cfg.unitPlural.slice(1); $('utConv').textContent=cfg.convUnit.toUpperCase();
+  $('recUtUnits').textContent=$('utUnits').textContent; $('recUtConv').textContent=cfg.convUnit.toUpperCase();
+  $('unitToggle').style.display=appMode==='blind'?'flex':'none';
+  $('btnFamMgr').style.display = (FAM_IDS.length>1) ? '' : 'none';
+  populateLoc(); buildRecTiles(); buildAreaDropdown(); buildAddProd();
+  resetLoc(); $('rackAreaSelect').value=''; renderRack(null,null);
+  entryUnit='units'; syncUnitToggleUI(); renderAgeLegend(); renderLog(); updateWalkBar();
+}
+$('btnFamMgr').onclick=function(){ if(!guardPending())return; renderFamModal(); $('famModal').classList.add('show'); };
+$('famModalClose').onclick=function(){$('famModal').classList.remove('show');};
+$('famModal').onclick=function(e){if(e.target===$('famModal'))$('famModal').classList.remove('show');};
+function renderFamModal(){
+  var h='<p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Your counts for every family are kept. Switch anytime; load a family\u2019s system data here without losing anything.</p>';
+  CONFIG.families.forEach(function(f){
+    var loaded=fytData[f.id]&&fytData[f.id].length>0;
+    var cnt=entries.filter(function(e){return e.family===f.id;}).length;
+    var isActive=f.id===activeFamily;
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;'+(isActive?'background:#EFF3FC;border-color:#C0D0F0;':'')+'">';
+    h+='<div style="flex:1;"><div style="font-weight:600;">'+f.label+(isActive?' <span style="font-size:10px;color:var(--navy);">(active)</span>':'')+'</div><div style="font-size:11px;color:var(--muted);">'+(loaded?(fytData[f.id].length+' system rows loaded'):'no system data loaded')+' &middot; '+cnt+' entries counted</div></div>';
+    if(appMode==='blind'){ h+='<button class="config-btn" onclick="famSwitch(\''+f.id+'\')">'+(isActive?'Current':'Count')+'</button>'; }
+    else if(loaded){ h+='<button class="config-btn" onclick="famSwitch(\''+f.id+'\')">'+(isActive?'Current':'Switch to')+'</button>'; }
+    else { h+='<button class="config-btn" style="border-color:#2E7D32;color:#1B5E20;" onclick="famUpload(\''+f.id+'\')">Load System</button>'; }
+    h+='</div>';
+  });
+  $('famModalBody').innerHTML=h;
+}
+window.famSwitch=function(id){ if(id===activeFamily){$('famModal').classList.remove('show');return;} activeFamily=id; applyFamily(); $('famModal').classList.remove('show'); showTab('count'); showToast('Now on '+FAM_LABEL[activeFamily]+'.'); };
+var famUploadTarget=null;
+window.famUpload=function(id){ famUploadTarget=id; $('famUploadFile').value=''; $('famUploadFile').click(); };
+$('famUploadFile').onchange=function(){ if(!this.files[0]||!famUploadTarget)return; var id=famUploadTarget; var r=new FileReader();
+  r.onload=function(e){ var rowsP=parseFYT(e.target.result); if(!rowsP.length){showToast('No rows parsed \u2014 check the file.');return;} fytData[id]=rowsP; activeFamily=id; applyFamily(); $('famModal').classList.remove('show'); showTab('count'); renderLog(); showToast(FAM_LABEL[id]+' loaded ('+rowsP.length+' rows). Now counting '+FAM_LABEL[id]+'.'); };
+  r.readAsText(this.files[0]); };
+
+function renderAgeLegend(){var el=$('ageLegend');
+  if(AGING&&AGING.enabled){el.innerHTML='Age flags: <span class="age-dot age-y"></span> &ge;'+AGING.yellowDays+'d &nbsp; <span class="age-dot age-r"></span> &ge;'+AGING.redDays+'d (since manufacture)'; el.style.display='flex';}
+  else el.style.display='none';}
+
+function keyAreas(){return (RACK_KEY[activeFamily]?Object.keys(RACK_KEY[activeFamily]):[]).filter(function(a){return !EXCLUDE_AREAS.has(a);}).sort();}
+function keyBins(area){return (RACK_KEY[activeFamily]&&RACK_KEY[activeFamily][area])?RACK_KEY[activeFamily][area]:[];}
+var machineComplete={};
+function machineHasEntry(m){return entries.some(function(e){return e.family===activeFamily && (e.locType==='Machine'||e.locType==='Blind') && (e.where.split(' / ')[0])===m;});}
+function machineDone(m){return !!(machineComplete[activeFamily]&&machineComplete[activeFamily][m]);}
+function machineCounted(m){return machineDone(m);}  // dropdown grey = complete only
+function markMachineComplete(m){ if(!machineComplete[activeFamily])machineComplete[activeFamily]={}; machineComplete[activeFamily][m]=true; }
+function populateLoc(){var sel=$('locSelect'); sel.innerHTML='<option value="">- Select -</option>';
+  if(appMode==='fyt'){DATA[activeFamily].machines.slice().sort(walkSort).forEach(function(m){var c=machineDone(m),pp=!c&&machineHasEntry(m);var o=new Option((c?'\u2713 ':(pp?'\u2022 ':''))+m,m);if(c)o.style.color='#9AA0A6';sel.add(o);});}
+  else{var g1=document.createElement('optgroup'); g1.label='Machines / '+LOCT.machine; DATA[activeFamily].machines.slice().sort(walkSort).forEach(function(m){var c=machineDone(m),pp=!c&&machineHasEntry(m);var o=new Option((c?'\u2713 ':(pp?'\u2022 ':''))+m,m);if(c)o.style.color='#9AA0A6';g1.appendChild(o);});
+    var g2=document.createElement('optgroup'); g2.label='Rack Areas'; keyAreas().forEach(function(a){g2.appendChild(new Option(a,a));});
+    sel.appendChild(g1); sel.appendChild(g2);}}
+function isRackArea(loc){return keyAreas().indexOf(loc)>=0;}
+
+function selectLoc(m){ if(!m){resetLoc();return;}
+  selectedLoc=m;
+  if(appMode==='blind'&&isRackArea(m)){$('binField').style.display=''; var bs=$('binSelect'); bs.innerHTML='<option value="">- Select Bin -</option>';
+    keyBins(m).slice().sort(natCmp).forEach(function(b){bs.add(new Option(b,b));}); selectedBin=null;
+    $('machineLocked').style.display='none'; $('matSection').style.display='none'; $('matPrompt').style.display=''; $('matPrompt').textContent='Select a bin to count.'; return;}
+  $('binField').style.display='none'; selectedBin=null; lockIn(m); (function(){var wp=walkPathList();for(var k=0;k<wp.length;k++){if(wp[k].t==='machine'&&wp[k].c===m){walkPos=k;break;}}})();}
+$('locSelect').onchange=function(){ selectLoc(this.value); };
+$('binSelect').onchange=function(){if(!this.value)return; selectedBin=this.value; lockIn(selectedLoc+' / '+selectedBin);};
+function lockIn(name){$('machinePickRow').style.display='none'; $('machineLocked').style.display='flex'; $('machineLockedName').textContent=name;
+  $('matSection').style.display=''; $('matPrompt').style.display='none'; buildMatTiles(); setQtyBoth(0); selectedMat=null; updateReadout();}
+$('btnChangeMachine').onclick=function(){ if(!guardPending())return; resetLoc(); };
+$('btnEmpty').onclick=function(){ if(!selectedLoc)return; var loc=selectedBin?selectedLoc+' / '+selectedBin:selectedLoc; if(entries.some(function(e){return e.family===activeFamily&&e.where===loc;})){showToast('Already have entries for '+loc+'.');return;} var ts=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); entries.push({id:Date.now()+'_'+(++seq),seq:seq,family:activeFamily,time:ts,locType:appMode==='fyt'?'Machine':'Blind',where:loc,material:'-',fytUnits:null,fytConv:null,countedUnits:0,countedConv:0,varUnits:null,varConv:null,status:'CHECKED',std:null,bol:'',note:'no material',isEdit:false}); if(appMode==='fyt'&&DATA[activeFamily].machines.indexOf(selectedLoc)>=0)markMachineComplete(selectedLoc); renderLog(); resetLoc(); updateWalkBar&&updateWalkBar(); showToast('Marked '+loc+' checked (empty).'); };
+function resetLoc(){populateLoc(); $('locSelect').value=''; $('binField').style.display='none'; $('machinePickRow').style.display=''; $('machineLocked').style.display='none';
+  $('matSection').style.display='none'; $('matPrompt').style.display=''; $('matPrompt').textContent='Select a location above to see materials.';
+  selectedLoc=null; selectedBin=null; selectedMat=null; setQtyBoth(0); updateReadout();}
+function validMat(m){ if(m==null)return false; var s=String(m).trim(); return s!=='' && s!=='\u2014' && s!=='-' && s!=='\u2013' && s.toLowerCase()!=='null' && s.toLowerCase()!=='undefined'; }
+function expectedAt(machine){ // FYT SA/QU rows for this machine with qty>0 -> {mat:units}
+  var exp={}; if(appMode!=='fyt'||!machine)return exp;
+  (fytData[activeFamily]||[]).forEach(function(r){
+    if((r.tipalm===LOCT.staging||r.tipalm===LOCT.machine) && r.area===machine){
+      var u=parseFloat(r.canido||0), q=parseFloat(r.cantidad||0);
+      if((u>0||q>0) && validMat(r.prod)){ exp[r.prod]=(exp[r.prod]||0)+ (u>0?u:0); }
+    }
+  });
+  return exp;
+}
+function countedFor(machine,m){ var s=0,found=false; entries.forEach(function(e){ if(e.family===activeFamily && (e.locType==='Machine'||e.locType==='Blind') && (e.where.split(' / ')[0])===machine && e.material===m){ s+=(e.countedUnits||0); found=true; } }); return found?{v:nf(s)}:null; }
+function buildMatTiles(){var t=$('matTiles'); t.style.display='block'; t.innerHTML=''; var cfg=DATA[activeFamily];
+  var machine=selectedLoc && cfg.machines.indexOf(selectedLoc)>=0 ? selectedLoc : null;
+  var exp=expectedAt(machine);
+  var expMats=Object.keys(exp).filter(validMat).sort(natCmp);  // material-code order
+  if(expMats.length){
+    var lab=document.createElement('div'); lab.className='tile-group-lbl'; lab.textContent='EXPECTED HERE'; t.appendChild(lab);
+    var wrap=document.createElement('div'); wrap.className='mat-tiles exp-row';
+    expMats.forEach(function(m){ var c=countedFor(machine,m);
+      var b=document.createElement('button'); b.className='mat-tile mat-tile-exp'+(m===selectedMat?' is-sel':'')+(c?' is-counted':'');
+      var second = c ? ('\u2713 you: '+c.v.toFixed(2)) : (cfg.unit+': '+exp[m].toFixed(2));
+      b.innerHTML='<span class="mt-code">'+m+'</span><span class="mt-fyt">'+second+'</span>';
+      b.onclick=function(){selMat(m);}; wrap.appendChild(b); });
+    t.appendChild(wrap);
+    var lab2=document.createElement('div'); lab2.className='tile-group-lbl'; lab2.textContent='OTHER MATERIALS'; t.appendChild(lab2);
+  }
+  var others=document.createElement('div'); others.className='mat-tiles';
+  cfg.materials.slice().filter(validMat).sort(natCmp).forEach(function(m){ if(exp[m]!==undefined)return; var b=document.createElement('button'); b.className='mat-tile'+(m===selectedMat?' active':''); b.textContent=m; b.onclick=function(){selMat(m);}; others.appendChild(b);});
+  t.appendChild(others);
+}
+function selMat(m){selectedMat=m; setQtyBoth(0); buildMatTiles(); document.querySelectorAll('#matTiles .mat-tile').forEach(function(t){var mc=t.querySelector('.mt-code'); var code=mc?mc.textContent:t.textContent; var isExp=t.className.indexOf('mat-tile-exp')>=0; t.classList.toggle('active',code===m&&!isExp); t.classList.toggle('is-sel',code===m&&isExp);}); updateReadout(); checkDupe();}
+$('utUnits').onclick=function(){entryUnit='units'; syncUnitToggleUI();};
+$('utConv').onclick=function(){entryUnit='conv'; syncUnitToggleUI();};
+function syncUnitToggleUI(){document.querySelectorAll('#unitToggle .ut-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-u')===entryUnit);});
+  $('stepperWrap').style.display=entryUnit==='units'?'':'none'; $('typedWrap').style.display=entryUnit==='conv'?'':'none'; updateReadout();}
+$('typedQty').oninput=updateReadout;
+function curUnits(){var cfg=DATA[activeFamily],s=selectedMat?cfg.std[selectedMat]:null;
+  if(appMode==='blind'&&entryUnit==='conv'){var c=parseFloat($('typedQty').value)||0; return {units:s?nf(c/s):null,conv:c};}
+  return {units:qty,conv:s!=null?nf(qty*s):null};}
+function updateReadout(){var cfg=DATA[activeFamily],el=$('convReadout'); if(!selectedMat){el.innerHTML='';return;}
+  var s=cfg.std[selectedMat]; if(s===undefined){el.innerHTML='<span style="color:#C0392B;font-size:12px;">No standard on file for '+selectedMat+'</span>';return;}
+  var cu=curUnits();
+  if(appMode==='blind'&&entryUnit==='conv')el.innerHTML=fmt(cu.conv)+' '+cfg.convUnit+' / '+s.toLocaleString()+' = <b>'+(cu.units!=null?cu.units.toFixed(2):'?')+' '+cfg.unit+'s</b>';
+  else el.innerHTML=qty.toFixed(2)+' '+cfg.unit+'s x '+s.toLocaleString()+' = <b>'+fmt(cu.conv)+' '+cfg.convUnit+'</b>';}
+function setQtyBoth(v){qty=Math.max(0,nf(v)); $('qtyDisplay').textContent=qty.toFixed(2); updateReadout();}
+function hasPending(){return $('matSection').style.display!=='none' && !!selectedMat && curUnits().units>0;}
+function guardPending(){ if(!hasPending())return true; if(confirm('You entered '+curUnits().units.toFixed(2)+' '+DATA[activeFamily].unit+'(s) of '+selectedMat+' but did not tap LOG COUNT. Discard it?')){ setQtyBoth(0); $('typedQty').value=''; return true; } return false; }
+$('btnPlus1').onclick=function(){setQtyBoth(qty+1);checkDupe();}; $('btnMinus1').onclick=function(){setQtyBoth(qty-1);};
+$('btnPlusQ').onclick=function(){setQtyBoth(qty+0.25);checkDupe();}; $('btnMinusQ').onclick=function(){setQtyBoth(qty-0.25);};
+function locKey(){return selectedBin?selectedLoc+' / '+selectedBin:selectedLoc;}
+function checkDupe(){if(!selectedLoc||!selectedMat){$('warnBox').style.display='none';return;}
+  var lt=appMode==='fyt'?'Machine':'Blind', w=locKey();
+  var ex=entries.filter(function(e){return e.family===activeFamily&&e.where===w&&e.material===selectedMat&&e.locType===lt;})[0];
+  if(ex){$('warnBox').style.display='flex'; $('warnText').textContent=w+' + '+selectedMat+' already logged at '+ex.time+'. Logging again adds it as EXTRA (additional tubs found).';} else $('warnBox').style.display='none';}
+$('btnLog').onclick=function(){
+  if(!selectedLoc){showToast('Select a location first.');return;}
+  if(appMode==='blind'&&isRackArea(selectedLoc)&&!selectedBin){showToast('Select a bin.');return;}
+  if(!selectedMat){showToast('Select a material.');return;}
+  var cu=curUnits(); if(!cu.units||cu.units===0){showToast('Quantity is 0.');return;}
+  var cfg=DATA[activeFamily],s=cfg.std[selectedMat]||null,lt=appMode==='fyt'?'Machine':'Blind',w=locKey();
+  var dupe=entries.filter(function(e){return e.family===activeFamily&&e.where===w&&e.material===selectedMat&&e.locType===lt;})[0];
+  var ts=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  entries.push({id:Date.now()+'_'+(++seq),seq:seq,family:activeFamily,time:ts,locType:lt,where:w,material:selectedMat,
+    fytUnits:null,fytConv:null,countedUnits:cu.units,countedConv:cu.conv,varUnits:null,varConv:null,status:lt==='Machine'?'COUNT':'BLIND',std:s,bol:'',note:$('noteInput').value.trim(),isEdit:!!dupe});
+  setQtyBoth(0); $('typedQty').value=''; $('noteInput').value=''; $('warnBox').style.display='none'; updateReadout(); buildMatTiles(); renderLog();
+  showToast('Logged.'+(appMode==='fyt'?' Machine still locked.':''));};
+
+$('btnResetFields').onclick=function(){setQtyBoth(0); $('typedQty').value=''; $('noteInput').value=''; $('warnBox').style.display='none'; selectedMat=null; buildMatTiles(); updateReadout();};
+
+// RECEPTIONS
+$('btnRecTop').onclick=function(){$('recModal').classList.add('show');};
+$('recModalClose').onclick=function(){$('recModal').classList.remove('show');};
+$('recModal').onclick=function(e){if(e.target===$('recModal'))$('recModal').classList.remove('show');};
+function buildRecTiles(){var t=$('recTiles'); t.innerHTML=''; recSelMat=null;
+  DATA[activeFamily].materials.filter(validMat).forEach(function(m){var b=document.createElement('button'); b.className='mat-tile'; b.textContent=m;
+    b.onclick=function(){document.querySelectorAll('#recTiles .mat-tile').forEach(function(x){x.classList.remove('active');}); b.classList.add('active'); recSelMat=m; updateRecReadout();}; t.appendChild(b);});}
+$('recUtUnits').onclick=function(){recUnit='units'; document.querySelectorAll('#recModal .ut-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-u')==='units');}); updateRecReadout();};
+$('recUtConv').onclick=function(){recUnit='conv'; document.querySelectorAll('#recModal .ut-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-u')==='conv');}); updateRecReadout();};
+$('recQty').oninput=updateRecReadout;
+function recUnitsConv(){var cfg=DATA[activeFamily],s=recSelMat?cfg.std[recSelMat]:null,v=parseFloat($('recQty').value)||0;
+  if(recUnit==='conv')return {units:s?nf(v/s):null,conv:v}; return {units:v,conv:s!=null?nf(v*s):null};}
+function updateRecReadout(){var cfg=DATA[activeFamily],el=$('recReadout'); if(!recSelMat){el.innerHTML='';return;}
+  var s=cfg.std[recSelMat]; if(s===undefined){el.innerHTML='<span style="color:#C0392B;font-size:12px;">No standard for '+recSelMat+'</span>';return;}
+  var c=recUnitsConv(); el.innerHTML=recUnit==='conv'?fmt(c.conv)+' '+cfg.convUnit+' = <b>'+(c.units!=null?c.units.toFixed(2):'?')+' '+cfg.unitPlural+'</b>':c.units.toFixed(2)+' '+cfg.unitPlural+' = <b>'+fmt(c.conv)+' '+cfg.convUnit+'</b>';}
+
+var recLoadStatus='YARD';
+function statusLabel(s){return s==='YARD'?'on the yard':s==='UNLOADING'?'unloading':s==='RECEIVED'?'received':'on the road';}
+document.querySelectorAll('#recStatusToggle .ut-btn').forEach(function(b){ b.onclick=function(){ recLoadStatus=b.getAttribute('data-s'); document.querySelectorAll('#recStatusToggle .ut-btn').forEach(function(x){x.classList.toggle('active',x===b);}); if($('loadResult')&&$('loadResult').style.display!=='none')renderLoadLookup(); }; });
+$('btnLoadLookup').onclick=function(){ renderLoadLookup(); };
+$('recBOL').addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault(); renderLoadLookup();} });
+function renderLoadLookup(){ var q=$('recBOL').value.trim(); var box=$('loadResult'); if(!q){box.style.display='none';return;}
+  var hit=findLoad(q); if(!hit){ box.style.display=''; box.innerHTML='<span style="color:#7A5C00;">No uploaded transit load matches \u201c'+q+'\u201d. Upload/refresh Transit, or add materials manually below.</span>'; return; }
+  var L=hit.load; var items=Object.keys(L.items); var already=L.status==='ARRIVED';
+  var rows=items.map(function(ik){ var p=ik.split('|'); return '<tr><td style="font-family:var(--mono);font-size:11px;">'+p[1]+'</td><td style="text-align:right;">'+L.items[ik].toFixed(2)+' '+DATA[p[0]].unitPlural+'</td><td style="font-size:10px;color:#6b7280;">'+FAM_LABEL[p[0]]+'</td></tr>'; }).join('');
+  var etaTxt=L.etaStr?(' &middot; ETA '+L.etaStr):'';
+  box.style.display='';
+  box.innerHTML='<div style="font-weight:700;margin-bottom:4px;">Trailer '+(L.trailer||'\u2014')+(L.bol&&L.bol!==L.trailer?(' / BOL '+L.bol):'')+etaTxt+'</div>'+
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:8px;">'+rows+'</table>'+
+    (already?'<div style="color:#1B5E20;font-weight:600;">\u2713 Already received into today\u2019s count.</div>'
+     :'<button class="btn-log" id="btnRecvLoad" style="width:100%;">&#10003; Add all '+items.length+' materials to count ('+statusLabel(recLoadStatus)+')</button>');
+  var bl=$('btnRecvLoad'); if(bl)bl.onclick=function(){ receiveLoad(hit.key); };
+}
+function receiveLoad(key){ var L=transitLoads[key]; if(!L)return; var st=recLoadStatus;
+  var ts=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); var n=0;
+  Object.keys(L.items).forEach(function(ik){ var p=ik.split('|'),fam=p[0],mat=p[1],qty=L.items[ik]; var s=DATA[fam].std[mat]||null;
+    entries.push({id:Date.now()+'_'+(++seq),seq:seq,family:fam,time:ts,locType:'Reception',where:'DOCK / '+(L.trailer||L.bol||'load'),material:mat,fytUnits:null,fytConv:null,countedUnits:nf(qty),countedConv:s!=null?nf(qty*s):null,varUnits:null,varConv:null,status:'RECEPTION',std:s,bol:(L.bol||L.trailer||''),note:'trailer '+(L.trailer||'')+' \u2014 '+statusLabel(st)}); n++; });
+  L.status='ARRIVED'; rebuildTransitAgg();
+  var onroad=Object.keys(transitLoads).filter(function(k){return transitLoads[k].status==='ONROAD';}).length; if(transitMeta)transitMeta.trailers=onroad; updateTransitStatus();
+  renderLog(); renderLoadLookup();
+  showToast('Received trailer '+(L.trailer||L.bol)+' \u2014 '+n+' materials added, removed from inbound.');
+}
+$('btnRecLog').onclick=function(){var bol=$('recBOL').value.trim(); if(!recSelMat){showToast('Select a quality.');return;}
+  var c=recUnitsConv(); if(!c.units||c.units===0){showToast('Enter a quantity.');return;}
+  var cfg=DATA[activeFamily],s=cfg.std[recSelMat]||null,ts=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  entries.push({id:Date.now()+'_'+(++seq),seq:seq,family:activeFamily,time:ts,locType:'Reception',where:'DOCK'+(bol?' / '+bol:''),material:recSelMat,
+    fytUnits:null,fytConv:null,countedUnits:c.units,countedConv:c.conv,varUnits:null,varConv:null,status:'RECEPTION',std:s,bol:bol,note:''});
+  $('recQty').value=''; recSelMat=null; document.querySelectorAll('#recTiles .mat-tile').forEach(function(x){x.classList.remove('active');}); $('recReadout').innerHTML='';
+  renderLog(); showToast('Added to '+(bol||'reception')+' \u2014 add another material, or change/clear the BOL.');};
+$('btnRecClear').onclick=function(){$('recBOL').value=''; $('recQty').value=''; recSelMat=null; document.querySelectorAll('#recTiles .mat-tile').forEach(function(x){x.classList.remove('active');}); $('recReadout').innerHTML=''; var lr=$('loadResult'); if(lr)lr.style.display='none';};
+
+// RACK VALIDATION
+function keyFor(area,bin,prod,i){return activeFamily+'|'+area+'|'+bin+'|'+prod+'|'+i;}
+function coAreas(){var out={}; fytData[activeFamily].forEach(function(r){if(r.tipalm===LOCT.rack&&!EXCLUDE_AREAS.has(r.area))out[r.area]=1;}); return Object.keys(out).sort(natCmp);}
+function areaRows(area){return fytData[activeFamily].filter(function(r){return r.tipalm===LOCT.rack&&r.area===area;});}
+function areaProgress(area){var rows=areaRows(area),d=0; rows.forEach(function(r,i){if(rackStatus[keyFor(area,r.bin,r.prod,i)])d++;}); return {done:d,total:rows.length};}
+function buildAreaDropdown(){var sel=$('rackAreaSelect'); if(!sel)return; var cur=sel.value; sel.innerHTML='<option value="">- Select Area -</option>';
+  coAreas().slice().sort(walkSort).forEach(function(a){var p=areaProgress(a),label=a,done=p.done>=p.total&&p.total>0;
+    if(done)label='\u2713 '+a+' ('+p.total+'/'+p.total+')'; else if(p.done>0)label=a+' ('+p.done+'/'+p.total+')';
+    var o=new Option(label,a); if(done)o.style.color='#9AA0A6'; sel.add(o);}); sel.value=cur;}
+function buildAddProd(){var sel=$('addProd'); if(!sel)return; sel.innerHTML='<option value="">- Select -</option>'; DATA[activeFamily].materials.filter(validMat).forEach(function(m){sel.add(new Option(m,m));});}
+function selectRackArea(area){ var bs=$('rackBinSelect'); bs.innerHTML='<option value="">- All Bins -</option>'; cancelAddLoc();
+  if(!area){bs.disabled=true; $('btnAddLoc').style.display='none'; $('btnMatchAll').style.display='none'; renderRack(null,null); return;}
+  bs.disabled=false; $('btnAddLoc').style.display='';
+  var seen={}; areaRows(area).forEach(function(r){seen[r.bin]=1;}); Object.keys(seen).sort(natCmp).forEach(function(b){bs.add(new Option(b==='---'?'(no bin)':b,b));});
+  var dl=$('addBinList'); dl.innerHTML=''; keyBins(area).slice().sort(natCmp).forEach(function(b){var o=document.createElement('option'); o.value=b; dl.appendChild(o);});
+  renderRack(area,null); (function(){var wp=walkPathList();for(var k=0;k<wp.length;k++){if(wp[k].t==='rack'&&wp[k].c===area){walkPos=k;break;}}})();}
+$('rackAreaSelect').onchange=function(){ selectRackArea(this.value); };
+$('rackBinSelect').onchange=function(){renderRack($('rackAreaSelect').value,this.value||null);};
+function ratioFor(r){var ca=parseFloat(r.canido),cd=parseFloat(r.cantidad); if(ca>0&&!isNaN(cd))return cd/ca; var s=DATA[activeFamily].std[r.prod]; return s||null;}
+
+$('btnMatchAll').onclick=function(){var area=$('rackAreaSelect').value; if(!area)return; var binF=$('rackBinSelect').value||null; var all=areaRows(area); var pend=[]; all.forEach(function(r,i){ if(binF&&r.bin!==binF)return; if(!rackStatus[keyFor(area,r.bin,r.prod,i)]) pend.push(i); }); if(!pend.length){showToast('Nothing pending here.');return;} var scope=binF?('bin '+binF):('area '+area); if(!confirm('Mark all '+pend.length+' pending in '+scope+' as MATCH? (You can still undo individual rows.)'))return; pend.forEach(function(i){ var r=all[i],key=keyFor(area,r.bin,r.prod,i); rackStatus[key]={status:'match',obs:parseFloat(r.canido||0)}; syncRackEntry(key,r,area); }); buildAreaDropdown(); renderRack(area,$('rackBinSelect').value||null); renderLog(); showToast(pend.length+' bins matched in '+area+'.');};
+$('btnAddLoc').onclick=function(){$('addLocPanel').style.display=''; $('btnAddLoc').style.display='none'; addQty=0; $('addQtyDisp').textContent='0.00'; $('addReadout').innerHTML=''; $('addBin').value=''; $('addProd').value=''; addUnit='units'; if($('addKg'))$('addKg').value=''; document.querySelectorAll('#addLocPanel .ut-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-u')==='units');}); $('addStepWrap').style.display=''; $('addKgWrap').style.display='none';};
+$('btnAddCancel').onclick=cancelAddLoc;
+function cancelAddLoc(){$('addLocPanel').style.display='none'; if($('rackAreaSelect').value)$('btnAddLoc').style.display='';}
+var addUnit='units';
+$('addUtUnits').onclick=function(){addUnit='units'; document.querySelectorAll('#addLocPanel .ut-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-u')==='units');}); $('addStepWrap').style.display=''; $('addKgWrap').style.display='none'; addUpdateReadout();};
+$('addUtConv').onclick=function(){addUnit='conv'; document.querySelectorAll('#addLocPanel .ut-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-u')==='conv');}); $('addStepWrap').style.display='none'; $('addKgWrap').style.display=''; addUpdateReadout();};
+$('addKg').oninput=function(){addUpdateReadout();};
+function addUnitsConv(){var cfg=DATA[activeFamily],prod=$('addProd').value,s=prod?cfg.std[prod]:null;
+  if(addUnit==='conv'){var v=parseFloat($('addKg').value)||0; return {units:s?nf(v/s):null,conv:v};}
+  return {units:addQty,conv:s!=null?nf(addQty*s):null};}
+function addUpdateReadout(){var cfg=DATA[activeFamily],el=$('addReadout'),p=$('addProd').value; if(!p){el.innerHTML='';return;}
+  var s=cfg.std[p]; if(s===undefined){el.innerHTML='<span style="color:#C0392B;font-size:12px;">No standard for '+p+'</span>';return;}
+  var c=addUnitsConv(); if(addUnit==='conv'){el.innerHTML=fmt(c.conv)+' '+cfg.convUnit+' / '+s.toLocaleString()+' = <b>'+(c.units!=null?c.units.toFixed(2):'?')+' '+cfg.unit+'s</b>';} else {el.innerHTML=addQty.toFixed(2)+' '+cfg.unit+'s x '+s.toLocaleString()+' = <b>'+fmt(addQty*s)+' '+cfg.convUnit+'</b>';}}
+$('addProd').onchange=addUpdateReadout;
+$('addPlus1').onclick=function(){addQty=nf(addQty+1);$('addQtyDisp').textContent=addQty.toFixed(2);addUpdateReadout();};
+$('addMinus1').onclick=function(){addQty=Math.max(0,nf(addQty-1));$('addQtyDisp').textContent=addQty.toFixed(2);addUpdateReadout();};
+$('addPlusQ').onclick=function(){addQty=nf(addQty+0.25);$('addQtyDisp').textContent=addQty.toFixed(2);addUpdateReadout();};
+$('addMinusQ').onclick=function(){addQty=Math.max(0,nf(addQty-0.25));$('addQtyDisp').textContent=addQty.toFixed(2);addUpdateReadout();};
+$('btnAddSave').onclick=function(){var area=$('rackAreaSelect').value,bin=$('addBin').value.trim(),prod=$('addProd').value;
+  if(!bin){showToast('Enter a bin.');return;} if(!prod){showToast('Select a product.');return;}
+  var cfg=DATA[activeFamily],s=cfg.std[prod]||null,cvt=addUnitsConv(),u=cvt.units,cv=cvt.conv;
+  if(!u||u===0){showToast('Enter a quantity.');return;}
+  var ts=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),where=area+' / '+bin,anote=addUnit==='conv'?'Not in System (kg entered)':'Not in System';
+  entries.push({id:Date.now()+'_'+(++seq),seq:seq,family:activeFamily,time:ts,locType:'Rack',where:where,material:prod,
+    fytUnits:0,fytConv:0,countedUnits:nf(u),countedConv:cv!=null?nf(cv):null,varUnits:nf(u),varConv:cv!=null?nf(cv):null,status:'ADDED',std:s,bol:'',note:anote,isEdit:false,rackKey:'ADD|'+activeFamily+'|'+where+'|'+prod+'|'+seq});
+  cancelAddLoc(); renderLog(); showToast('Added '+where+' '+prod+' to count.');};
+
+function renderRack(area,binFilter){var el=$('fytTable');
+  if(!area){el.innerHTML='<div class="rack-empty">Select a rack area to see today\u2019s system contents.</div>'; $('coverBanner').innerHTML=''; var _mab=$('btnMatchAll'); if(_mab)_mab.style.display='none'; return;}
+  var all=areaRows(area); var cfg=DATA[activeFamily];
+  if(!all.filter(function(r){return !binFilter||r.bin===binFilter;}).length){el.innerHTML='<div class="rack-empty">No '+LOCT.rack+' rows for this selection.</div>';}
+  var html='<div class="fyt-wrap"><div class="fyt-head"><span>Bin</span><span>Product</span><span>Units</span><span>'+cfg.convUnit+'</span><span>Status</span></div>';
+  var _idx=all.map(function(r,i){return {r:r,i:i};}); _idx.sort(function(x,y){return natCmp(x.r.bin,y.r.bin)||natCmp(x.r.prod,y.r.prod);});
+  _idx.forEach(function(o){ var r=o.r, i=o.i; if(binFilter&&r.bin!==binFilter)return;
+    var key=keyFor(area,r.bin,r.prod,i),st=rackStatus[key]; var fytU=parseFloat(r.canido||0),fytC=parseFloat(r.cantidad||0);
+    var ic=st?('is-'+(st.status==='match'?'match':st.status==='flag'?'flag':'miss')):'';
+    var af=ageFlag(r.prod,r.fecfab); var dot=''; if(af&&af.level)dot=' <span class="age-dot age-'+af.level+'" title="'+af.days+' days since manufacture"></span>';
+    var cell;
+    if(!st)cell='<div class="fyt-actions"><button class="ra ra-m" onclick="markRack(\''+key+'\',\'match\','+i+')">Match</button><button class="ra ra-f" onclick="markRack(\''+key+'\',\'flag\','+i+')">Flag</button><button class="ra ra-x" onclick="markRack(\''+key+'\',\'miss\','+i+')">Missing</button></div>';
+    else{var bd=st.status==='match'?'<span class="sb sb-ok">MATCH</span>':st.status==='flag'?'<span class="sb sb-flag">DISCREPANCY</span>':'<span class="sb sb-miss">MISSING</span>';
+      cell='<div class="fyt-actions">'+bd+'<button class="reset-mini" onclick="resetRack(\''+key+'\')">undo</button></div>';}
+    html+='<div class="fyt-item '+ic+'"><div class="fyt-row"><span class="mono">'+(r.bin==='---'?'-':r.bin)+'</span><span class="mono" style="font-weight:600;">'+r.prod+dot+'</span><span class="mono">'+fytU.toFixed(2)+'</span><span>'+fytC.toFixed(1)+'</span><span style="padding:0;">'+cell+'</span></div>';
+    if(st&&st.status==='flag'){var ratio=ratioFor(r),obs=st.obs,obsC=ratio!=null?nf(obs*ratio):null,vU=nf(obs-fytU),vC=obsC!=null?nf(obsC-fytC):null;
+      var col=vU===0?'#5f6368':vU<0?'#C0392B':'#1B5E20',bg=vU===0?'#eee':vU<0?'#FBD5D5':'#C8E6C9';
+      html+='<div class="fyt-expand"><span class="fyt-orig">System: <b>'+fytU.toFixed(2)+' '+cfg.unit+'</b> &middot; '+fytC.toFixed(1)+' '+cfg.convUnit+'</span><span style="font-size:11px;color:#6b7280;">Observed:</span><div class="exp-stepper"><button class="exp-btn" onclick="adjObs(\''+key+'\','+i+',-1)">&minus;1</button><button class="exp-btn" onclick="adjObs(\''+key+'\','+i+',-0.25)">&minus;&frac14;</button><span class="exp-val">'+obs.toFixed(2)+'</span><button class="exp-btn" onclick="adjObs(\''+key+'\','+i+',0.25)">+&frac14;</button><button class="exp-btn" onclick="adjObs(\''+key+'\','+i+',1)">+1</button></div><span style="font-size:11px;color:#6b7280;">or type kg:</span><input class="exp-kg" type="number" step="1" min="0" placeholder="kg" onchange="adjObsKg(\''+key+'\','+i+',this.value)" style="width:74px;height:30px;font-size:13px;padding:0 6px;text-align:right;"><span class="exp-conv">'+(obsC!=null?'= '+fmt(obsC)+' '+cfg.convUnit:'')+'</span><span class="exp-var" style="color:'+col+';background:'+bg+';">&Delta; '+(vU>0?'+':'')+vU.toFixed(2)+' '+cfg.unit+(vC!=null?' / '+(vC>0?'+':'')+fmt(vC)+' '+cfg.convUnit:'')+'</span></div>';}
+    html+='</div>';});
+  var p=areaProgress(area);
+  var m=0,fl=0,mi=0; all.forEach(function(r,i){var s2=rackStatus[keyFor(area,r.bin,r.prod,i)]; if(s2){if(s2.status==='match')m++; else if(s2.status==='flag')fl++; else mi++;}});
+  html+='<div class="rack-footer"><span style="color:#1B5E20;">\u2713 '+m+' matched</span><span style="color:#7A5C00;">\u26A0 '+fl+' discrepancy</span><span style="color:#C0392B;">\u2715 '+mi+' missing</span><span style="color:#6b7280;">'+(p.total-p.done)+' pending of '+p.total+'</span></div></div>';
+  el.innerHTML=html;
+  var _mab=$('btnMatchAll'); if(_mab){ var _bf=$('rackBinSelect').value||null; var _rows=areaRows(area), _pend=0; _rows.forEach(function(r,i){ if(_bf&&r.bin!==_bf)return; if(!rackStatus[keyFor(area,r.bin,r.prod,i)])_pend++; }); if(_pend>0){_mab.style.display='';_mab.textContent='\u2713 Match all '+_pend+' pending in '+(_bf||area);} else _mab.style.display='none'; }
+  var totP=0,doneP=0; coAreas().forEach(function(a){var pp=areaProgress(a); totP+=pp.total; doneP+=pp.done;});
+  $('coverBanner').innerHTML='<div class="cover-banner '+(doneP>=totP?'cover-ok':'cover-warn')+'">'+(doneP>=totP?'\u2713 All racks validated ('+doneP+'/'+totP+')':'\u26A0 '+(totP-doneP)+' racks still to validate ('+doneP+'/'+totP+') \u2014 every rack must be validated')+'</div>'; updateWalkBar();}
+window.markRack=function(key,status,i){var area=$('rackAreaSelect').value,all=areaRows(area),r=all[i]; if(!r)return;
+  var fytU=parseFloat(r.canido||0); rackStatus[key]={status:status,obs:status==='miss'?0:fytU}; syncRackEntry(key,r,area);
+  buildAreaDropdown(); renderRack(area,$('rackBinSelect').value||null); renderLog();};
+window.resetRack=function(key){delete rackStatus[key]; entries=entries.filter(function(e){return e.rackKey!==key;}); buildAreaDropdown(); renderRack($('rackAreaSelect').value,$('rackBinSelect').value||null); renderLog();};
+window.adjObs=function(key,i,d){var st=rackStatus[key]; if(!st)return; st.obs=Math.max(0,nf(st.obs+d)); var area=$('rackAreaSelect').value,all=areaRows(area); syncRackEntry(key,all[i],area); renderRack(area,$('rackBinSelect').value||null); renderLog();};
+window.adjObsKg=function(key,i,kg){var st=rackStatus[key]; if(!st)return; var v=parseFloat(kg); if(isNaN(v)||v<0){return;} var area=$('rackAreaSelect').value,all=areaRows(area),r=all[i]; var ratio=(parseFloat(r.canido)>0&&parseFloat(r.cantidad)>0)?(parseFloat(r.cantidad)/parseFloat(r.canido)):(DATA[activeFamily].std[r.prod]||null); if(!ratio){showToast('No standard for '+r.prod+' \u2014 use tub steppers.');return;} st.obs=nf(v/ratio); syncRackEntry(key,r,area); renderRack(area,$('rackBinSelect').value||null); renderLog(); showToast(v+' '+cfg_unit()+' = '+st.obs.toFixed(2)+' '+DATA[activeFamily].unit);};
+function cfg_unit(){return DATA[activeFamily].convUnit;}
+function syncRackEntry(key,r,area){var st=rackStatus[key]; var fytU=parseFloat(r.canido||0),fytC=parseFloat(r.cantidad||0),ratio=ratioFor(r),obs=st.obs;
+  var obsC=st.status==='match'?fytC:(ratio!=null?nf(obs*ratio):null); var ts=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var label=st.status==='match'?'MATCH':st.status==='flag'?'DISCREPANCY':'MISSING'; var where=area+' / '+(r.bin==='---'?'NO-BIN':r.bin);
+  var ex=-1; for(var k=0;k<entries.length;k++){if(entries[k].rackKey===key){ex=k;break;}}
+  var base=ex>=0?entries[ex]:{id:Date.now()+'_'+(++seq),seq:seq};
+  var entry={id:base.id,seq:base.seq,rackKey:key,family:activeFamily,time:ts,locType:'Rack',where:where,material:r.prod,fytUnits:fytU,fytConv:fytC,countedUnits:obs,countedConv:obsC,varUnits:nf(obs-fytU),varConv:obsC!=null?nf(obsC-fytC):null,status:label,std:null,bol:'',note:'',isEdit:false,ageDaysVal:ageDays(r.fecfab)};
+  if(ex>=0)entries[ex]=entry; else entries.push(entry);}
+
+$('btnUndo').onclick=function(){var fam=entries.filter(function(e){return e.family===activeFamily;}); if(!fam.length){showToast('Nothing to undo.');return;}
+  var last=fam[0]; fam.forEach(function(e){if(e.seq>last.seq)last=e;});
+  if(last.rackKey&&rackStatus[last.rackKey])delete rackStatus[last.rackKey];
+  entries=entries.filter(function(e){return e.id!==last.id;}); buildAreaDropdown(); if(tab==='rack')renderRack($('rackAreaSelect').value||null,$('rackBinSelect').value||null); renderLog(); showToast('Removed: '+last.where+' - '+last.material);};
+$('btnBack').onclick=function(){ if(!guardPending())return; if(entries.length&&!confirm('Start a new session? Export first to save.'))return; clearSaved(); location.reload();};
+$('btnClear').onclick=function(){if(!entries.filter(function(e){return e.family===activeFamily;}).length)return;
+  if(confirm('Clear all '+FAM_LABEL[activeFamily]+' entries?')){entries=entries.filter(function(e){return e.family!==activeFamily;});
+    Object.keys(rackStatus).forEach(function(k){if(k.indexOf(activeFamily+'|')===0)delete rackStatus[k];});
+    buildAreaDropdown(); renderRack($('rackAreaSelect').value||null,null); renderLog(); showToast('Cleared.');}};
+
+var esc=function(c){return '"'+String(c==null?'':c).replace(/"/g,'""')+'"';};
+function download(name,csv,mime){var b=new Blob([csv],{type:mime||'text/csv'}); var u=URL.createObjectURL(b); var a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);}
+$('btnExport').onclick=function(){var ent=entries.filter(function(e){return e.family===activeFamily;}); if(!ent.length){showToast('No entries.');return;}
+  var cfg=DATA[activeFamily],cu=cfg.convUnit;
+  var rows=[['Date','Counter','Family','Mode','Start_Time','Count_Time','Location_Type','Where','BOL','ML_Material','System_Units','SYS_'+cu,'Counted_Units','Counted_'+cu,'Variance_Units','Variance_'+cu,'Status','Extra_Flag','Note','Age_Days']];
+  ent.forEach(function(e){rows.push([dateStr,counter,FAM_LABEL[activeFamily],appMode,startTime,e.time,e.locType,e.where,e.bol||'',e.material,e.fytUnits==null?'':e.fytUnits,e.fytConv==null?'':e.fytConv,e.countedUnits==null?'':e.countedUnits,e.countedConv==null?'':e.countedConv,e.varUnits==null?'':e.varUnits,e.varConv==null?'':e.varConv,e.status,e.isEdit?'EXTRA':'',e.note,(e.ageDaysVal==null?'':e.ageDaysVal)]);});
+  download((CONFIG.site||'Count')+'_'+activeFamily+'_count_'+dateStr+'.csv',rows.map(function(r){return r.map(esc).join(',');}).join('\r\n')); showToast('Full CSV downloaded.');};
+
+$('btnPlanExp').onclick=function(){ exportPlanningInventory(true); };
+function exportPlanningInventory(allFamilies){
+  var fams = allFamilies ? Object.keys(DATA) : [activeFamily];
+  var rows=[['Date','Family','Product','OnHand_Units','OnHand_Conv','Unit','TGT/Basis']];
+  var any=false;
+  fams.forEach(function(fam){
+    var cfg=DATA[fam], units={}, conv={};
+    entries.forEach(function(e){ if(e.family===fam && ['Machine','Rack','Blind','Reception'].indexOf(e.locType)>=0){ units[e.material]=(units[e.material]||0)+(e.countedUnits||0); if(e.countedConv!=null)conv[e.material]=(conv[e.material]||0)+e.countedConv; } });
+    Object.keys(units).filter(validMat).sort(natCmp).forEach(function(m){ any=true;
+      var tgt=(CONFIG.families[famIndex(fam)].demand&&0)||''; // placeholder; target basis lives in workbook MASTER
+      rows.push([dateStr, FAM_LABEL[fam], m, units[m].toFixed(2), (conv[m]!==undefined?conv[m].toFixed(2):''), cfg.convUnit, '']);
+    });
+  });
+  if(!any){showToast('No inventory to export yet.');return;}
+  download((CONFIG.site||'PlayCraft')+'_PlanningInventory_'+(allFamilies?'ALL':activeFamily)+'_'+dateStr+'.csv', rows.map(function(r){return r.map(esc).join(',');}).join('\r\n'));
+  showToast('Planning-Inventory CSV downloaded \u2014 paste into the Master Planning workbook, INVENTORY tab at A4.');
+}
+$('btnExportMMRP').onclick=function(){var ent=entries.filter(function(e){return e.family===activeFamily&&['Machine','Rack','Blind','Reception'].indexOf(e.locType)>=0;});
+  if(!ent.length){showToast('No inventory to export.');return;}
+  if(appMode==='fyt'){var totP=0,doneP=0; coAreas().forEach(function(a){var pp=areaProgress(a);totP+=pp.total;doneP+=pp.done;});
+    if(doneP<totP&&!confirm((totP-doneP)+' of '+totP+' racks are NOT yet validated. Unvalidated racks are missing from this total. Export anyway?'))return;}
+  var cfg=DATA[activeFamily],units={},conv={};
+  ent.forEach(function(e){units[e.material]=(units[e.material]||0)+(e.countedUnits||0); if(e.countedConv!=null)conv[e.material]=(conv[e.material]||0)+e.countedConv;});
+  var rows=[['ML_Material','Total_'+cfg.unitPlural,'Total_'+cfg.convUnit]];
+  Object.keys(units).sort().forEach(function(k){rows.push([k,units[k].toFixed(2),(conv[k]!==undefined?conv[k].toFixed(2):'')]);});
+  download((CONFIG.site||'Count')+'_'+activeFamily+'_INVENTORY_TOTAL_'+dateStr+'.csv',rows.map(function(r){return r.map(esc).join(',');}).join('\r\n')); showToast('Inventory total downloaded.');};
+
+
+
+// ===== DAYS OF STOCK (demand plan + transit-aware) =====
+function famIndex(fam){ for(var i=0;i<CONFIG.families.length;i++){if(CONFIG.families[i].id===fam)return i;} return 0; }
+var DEMAND_KEY='daily_count_demand_v2';   // manual "today" overrides
+var PLAN_KEY='daily_count_demandplan_v1'; // uploaded dated plan
+var demandStore={}, demandPlan={};
+(function initDemand(){ try{demandStore=JSON.parse(localStorage.getItem(DEMAND_KEY))||{};}catch(e){demandStore={};}
+  try{demandPlan=JSON.parse(localStorage.getItem(PLAN_KEY))||{};}catch(e){demandPlan={};} })();
+function saveDemand(){ try{localStorage.setItem(DEMAND_KEY,JSON.stringify(demandStore));}catch(e){} }
+function savePlan(){ try{localStorage.setItem(PLAN_KEY,JSON.stringify(demandPlan));}catch(e){} }
+
+var demandBasis='today'; // today | avg3 | avg7 | builtin
+function todayMDY(){ function p(n){return(n<10?'0':'')+n;} var d=new Date(); return p(d.getMonth()+1)+'/'+p(d.getDate())+'/'+d.getFullYear(); }
+function planDatesAhead(n){ // returns next n MM/DD/YYYY strings incl today
+  var out=[],d=new Date(); function p(x){return(x<10?'0':'')+x;}
+  for(var i=0;i<n;i++){ out.push(p(d.getMonth()+1)+'/'+p(d.getDate())+'/'+d.getFullYear()); d.setDate(d.getDate()+1); }
+  return out;
+}
+function planValue(fam,mat,mdy){ return (demandPlan[fam]&&demandPlan[fam][mat]&&demandPlan[fam][mat][mdy]!=null)?demandPlan[fam][mat][mdy]:null; }
+function configDemand(fam,mat){ var d=CONFIG.families[famIndex(fam)].demand||{}; return d[mat]!=null?d[mat]:0; }
+function hasPlan(fam){ return demandPlan[fam] && Object.keys(demandPlan[fam]).length>0; }
+
+// effective daily demand for a material, per current basis; manual override always wins
+function effectiveDemand(fam,mat){
+  if(demandStore[fam]&&demandStore[fam][mat]!=null) return demandStore[fam][mat]; // today's override
+  if(demandBasis==='builtin' || !hasPlan(fam)) return configDemand(fam,mat);
+  if(demandBasis==='today'){ var v=planValue(fam,mat,todayMDY()); return v!=null?v:configDemand(fam,mat); }
+  var n=demandBasis==='avg3'?3:7, days=planDatesAhead(n), sum=0, cnt=0;
+  days.forEach(function(dd){ var v=planValue(fam,mat,dd); if(v!=null){sum+=v;cnt++;} });
+  return cnt?nf(sum/cnt):configDemand(fam,mat);
+}
+function isOverridden(fam,mat){ return !!(demandStore[fam]&&demandStore[fam][mat]!=null); }
+window.dosSet=function(mat,val){ var v=parseFloat(val); if(isNaN(v))v=0; if(!demandStore[activeFamily])demandStore[activeFamily]={}; demandStore[activeFamily][mat]=v; saveDemand(); renderDos(); };
+function dosResetFamily(){ if(!confirm('Clear today\u2019s overrides for '+FAM_LABEL[activeFamily]+'? (Uploaded plan and built-in stay.)'))return; delete demandStore[activeFamily]; saveDemand(); renderDos(); showToast('Overrides cleared.'); }
+
+function invUnits(fam,mat){ var s=0; entries.forEach(function(e){ if(e.family===fam && e.material===mat && ['Machine','Rack','Blind','Reception'].indexOf(e.locType)>=0) s+=(e.countedUnits||0); }); return s; }
+// transit (on-road) inbound for a material, from live loads (ARRIVED excluded)
+function inboundFor(fam,mat){ var qty=0,eta=null,etaStr=null,trailer=null; var ik=fam+'|'+mat;
+  Object.keys(transitLoads).forEach(function(k){ var L=transitLoads[k]; if(L.status==='ARRIVED')return; var q=L.items[ik]; if(!q)return; qty+=q; if(L.eta && (!eta||L.eta<eta)){eta=L.eta;etaStr=L.etaStr;trailer=L.trailer;} });
+  return {qty:nf(qty), eta:etaStr, trailer:trailer}; }
+
+function dosRows(){
+  var fam=activeFamily, mats={};
+  var addm=function(x){ if(validMat(x)) mats[x]=1; };
+  var dm=CONFIG.families[famIndex(fam)].demand||{}; Object.keys(dm).forEach(addm);
+  if(demandStore[fam]) Object.keys(demandStore[fam]).forEach(addm);
+  if(demandPlan[fam]) Object.keys(demandPlan[fam]).forEach(addm);
+  if(transitData[fam]) Object.keys(transitData[fam]).forEach(addm);
+  entries.forEach(function(e){ if(e.family===fam && ['Machine','Rack','Blind','Reception'].indexOf(e.locType)>=0) addm(e.material); });
+  var rows=[];
+  Object.keys(mats).forEach(function(mat){
+    var inv=invUnits(fam,mat), daily=effectiveDemand(fam,mat), inb=inboundFor(fam,mat);
+    var dos = daily>0 ? inv/daily : null;
+    var projDos = daily>0 ? (inv+inb.qty)/daily : null;
+    rows.push({mat:mat, inv:inv, daily:daily, dos:dos, inbound:inb.qty, eta:inb.eta, trailer:inb.trailer, projDos:projDos});
+  });
+  rows.sort(function(a,b){ return natCmp(a.mat,b.mat); });
+  return rows;
+}
+function dosLevel(dos){ if(dos==null)return ''; var t=(CONFIG.dos||{}); if(dos < (t.critical!=null?t.critical:1)) return 'r'; if(dos < (t.watch!=null?t.watch:3)) return 'y'; return ''; }
+// risk considers inbound: red DOS with an inbound trailer = "tight", without = "action"
+function riskLabel(r){
+  var lv=dosLevel(r.dos);
+  if(lv==='r'){ if(r.inbound>0){ var plv=dosLevel(r.projDos); return plv==='r'?{t:'EXPEDITE',c:'#C0392B'}:{t:'TIGHT \u2014 covered if trailer on time',c:'#B26A00'}; } return {t:'ACTION REQUIRED',c:'#C0392B'}; }
+  if(lv==='y'){ return {t:'Watch',c:'#7A5C00'}; }
+  return {t:'OK',c:'#1B5E20'};
+}
+function criticalRows(){ return dosRows().filter(function(r){ return r.dos!=null && dosLevel(r.dos); }); }
+
+$('btnDos').onclick=function(){ renderDos(); $('dosModal').classList.add('show'); };
+$('dosClose').onclick=function(){$('dosModal').classList.remove('show');};
+$('dosModal').onclick=function(e){if(e.target===$('dosModal'))$('dosModal').classList.remove('show');};
+window.setDemandBasis=function(b){ demandBasis=b; renderDos(); };
+function renderDos(){
+  var cfg=DATA[activeFamily], rows=dosRows(), t=(CONFIG.dos||{});
+  var crit=rows.filter(function(r){return r.dos!=null&&dosLevel(r.dos)==='r';}).length;
+  var watch=rows.filter(function(r){return r.dos!=null&&dosLevel(r.dos)==='y';}).length;
+  var today=new Date().toLocaleDateString('en-US',{weekday:'long',month:'2-digit',day:'2-digit'});
+  var planSrc = hasPlan(activeFamily) ? ('plan loaded') : ('no plan \u2014 using built-in avg');
+  var h='<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Today: <b style="color:var(--navy);">'+today+'</b> &middot; demand source: <b>'+planSrc+'</b>. On-hand \u00f7 daily demand. <b style="color:#C0392B;">'+crit+' critical</b> &middot; <b style="color:#7A5C00;">'+watch+' watch</b> (red &lt;'+(t.critical||1)+'d, yellow &lt;'+(t.watch||3)+'d).</div>';
+  // basis selector
+  var opts=[['today','Today'],['avg3','3-Day Avg'],['avg7','7-Day Avg'],['builtin','Built-in']];
+  h+='<div class="unit-toggle" style="display:inline-flex;margin-bottom:10px;flex-wrap:wrap;">';
+  opts.forEach(function(o){ h+='<button class="ut-btn'+(demandBasis===o[0]?' active':'')+'" onclick="setDemandBasis(\''+o[0]+'\')">'+o[1]+'</button>'; });
+  h+='</div>';
+  var anyInb=rows.some(function(r){return r.inbound>0;});
+  h+='<table class="log-table" style="table-layout:auto;"><thead><tr><th>ML#</th><th>On-hand</th><th>Dmd/day</th><th>Days</th>'+(anyInb?'<th>Inbound</th><th>Proj Days</th><th>Status</th>':'')+'</tr></thead><tbody>';
+  rows.forEach(function(r){
+    var lv=dosLevel(r.dos); var bg=lv==='r'?'background:#FDECEA;':lv==='y'?'background:#FFF8E1;':'';
+    var dosTxt = r.dos==null ? '<span style="color:#999;">no dmd</span>' : (r.dos>999?'&infin;':r.dos.toFixed(1));
+    var ov=isOverridden(activeFamily,r.mat)?' <span style="font-size:9px;color:var(--navy);">edited</span>':'';
+    var risk=riskLabel(r);
+    var inbTxt = r.inbound>0 ? ('+'+r.inbound+(r.eta?' <span style="font-size:10px;color:#6b7280;">'+r.eta+'</span>':' <span style="font-size:10px;color:#6b7280;">ETA?</span>')) : '<span style="color:#bbb;">\u2014</span>';
+    var projTxt = (r.inbound>0&&r.projDos!=null)?(r.projDos>999?'&infin;':r.projDos.toFixed(1)):'';
+    h+='<tr style="'+bg+'"><td style="font-family:var(--mono);font-size:11px;font-weight:600;">'+r.mat+'</td><td>'+r.inv.toFixed(2)+' '+cfg.unit+'</td>'+
+       '<td><input type="number" step="0.1" min="0" value="'+r.daily+'" onchange="dosSet(\''+r.mat+'\',this.value)" style="width:70px;height:30px;font-size:13px;padding:0 6px;text-align:right;"/>'+ov+'</td>'+
+       '<td style="font-weight:700;'+(lv==='r'?'color:#C0392B;':lv==='y'?'color:#7A5C00;':'')+'">'+dosTxt+'</td>'+
+       (anyInb?('<td>'+inbTxt+'</td><td style="font-weight:600;">'+projTxt+'</td><td style="font-size:11px;font-weight:700;color:'+risk.c+'">'+risk.t+'</td>'):'')+'</tr>';
+  });
+  h+='</tbody></table>';
+  $('dosBody').innerHTML=h;
+}
+$('dosResetBtn').onclick=dosResetFamily;
+
+function critText(){
+  var rows=criticalRows(), cfg=DATA[activeFamily];
+  return rows.map(function(r){ var risk=riskLabel(r); var inb=r.inbound>0?(' | inbound +'+r.inbound+(r.eta?' ETA '+r.eta:'')):''; return r.mat+'  \u2014  on-hand '+r.inv.toFixed(1)+' '+cfg.unitPlural+',  ~'+(r.dos!=null?r.dos.toFixed(1):'0')+' days'+inb+'  ['+risk.t+']'; }).join('\n');
+}
+$('dosCsv').onclick=function(){ var rows=criticalRows(), cfg=DATA[activeFamily]; if(!rows.length){showToast('No critical items.');return;}
+  var out=[['Date','Counter','Family','ML_Material','OnHand_'+cfg.unitPlural,'Demand_Per_Day','Days_Of_Stock','Inbound_Shipped','Next_ETA','Projected_Days','Risk']];
+  rows.forEach(function(r){var risk=riskLabel(r); out.push([dateStr,counter,FAM_LABEL[activeFamily],r.mat,r.inv.toFixed(2),r.daily,(r.dos!=null?r.dos.toFixed(2):''),r.inbound||0,r.eta||'',(r.projDos!=null?r.projDos.toFixed(2):''),risk.t]);});
+  download((CONFIG.site||'Count')+'_'+activeFamily+'_CriticalList_'+dateStr+'.csv',out.map(function(r){return r.map(esc).join(',');}).join('\r\n'));
+  showToast('Critical list CSV downloaded.'); };
+$('dosPrint').onclick=function(){ var rows=criticalRows(), cfg=DATA[activeFamily]; if(!rows.length){showToast('No critical items.');return;}
+  var h='<div class="print-h">'+(CONFIG.site||'')+' \u2014 Critical Items \u2014 '+FAM_LABEL[activeFamily]+'</div>';
+  h+='<div class="print-sub">Date: '+dateStr+' &nbsp; Counter: '+counter+' &nbsp; On-hand vs demand, with inbound \u2014 for US2.</div>';
+  h+='<table class="pt"><thead><tr><th>ML#</th><th>On-hand</th><th>Dmd/day</th><th>Days</th><th>Inbound</th><th>ETA</th><th>Proj Days</th><th>Risk</th></tr></thead><tbody>';
+  rows.forEach(function(r){var risk=riskLabel(r); h+='<tr><td>'+r.mat+'</td><td>'+r.inv.toFixed(2)+'</td><td>'+r.daily+'</td><td>'+(r.dos!=null?r.dos.toFixed(1):'')+'</td><td>'+(r.inbound||'')+'</td><td>'+(r.eta||'')+'</td><td>'+(r.projDos!=null?r.projDos.toFixed(1):'')+'</td><td>'+risk.t+'</td></tr>'; });
+  h+='</tbody></table>'; $('printArea').innerHTML=h; window.print(); };
+$('dosEmail').onclick=function(){ var rows=criticalRows(); if(!rows.length){showToast('No critical items to email.');return;}
+  var to=(CONFIG.emailTo||''); var subject=(CONFIG.site||'PlayCraft')+' Critical Items '+dateStr+' ('+FAM_LABEL[activeFamily]+')';
+  var body='Critical / watch items ('+dateStr+'):\n\n'+critText()+'\n\n(Days of stock = on-hand \u00f7 daily demand. Inbound = SHIPPED trailers. From the count tool.)';
+  window.location.href='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body); };
+
+// ===== DEMAND PLAN UPLOAD (dated CSV: Date, Family, ML_Material, Demand_Units) =====
+function parseCsvRows(text){
+  var lines=text.replace(/\r/g,'').split('\n').filter(function(l){return l.trim().length;});
+  if(!lines.length)return {hdr:[],rows:[]};
+  var delim=(lines[0].indexOf('\t')>=0 && lines[0].indexOf(',')<0)?'\t':',';
+  function split(l){var out=[],cur='',q=false; for(var i=0;i<l.length;i++){var ch=l[i]; if(ch==='"'){q=!q;} else if(ch===delim&&!q){out.push(cur);cur='';} else cur+=ch;} out.push(cur); return out.map(function(s){return s.trim().replace(/^"|"$/g,'');});}
+  var hdr=split(lines[0]); var rows=[]; for(var i=1;i<lines.length;i++) rows.push(split(lines[i]));
+  return {hdr:hdr,rows:rows};
+}
+function famFromCode(code){ for(var i=0;i<CONFIG.families.length;i++){ if(CONFIG.families[i].standards[code]!==undefined) return CONFIG.families[i].id; } return null; }
+function famFromLabel(lbl){ if(!lbl)return null; lbl=lbl.toUpperCase(); for(var i=0;i<CONFIG.families.length;i++){ var f=CONFIG.families[i]; if(f.id.toUpperCase()===lbl||f.label.toUpperCase()===lbl) return f.id; } return null; }
+
+$('btnDemandUp').onclick=function(){$('fileDemand').click();};
+$('fileDemand').onchange=function(){ if(!this.files[0])return; var r=new FileReader();
+  r.onload=function(e){ try{
+    var pr=parseCsvRows(e.target.result); var H={}; pr.hdr.forEach(function(h,i){H[h.toUpperCase().replace(/\s+/g,'_')]=i;});
+    var di=H['DATE'], fi=(H['FAMILY']!=null?H['FAMILY']:null), mi=(H['ML_MATERIAL']!=null?H['ML_MATERIAL']:H['MATERIAL']), qi=(H['DEMAND_UNITS']!=null?H['DEMAND_UNITS']:H['DEMAND']);
+    if(di==null||mi==null||qi==null){showToast('Need columns: Date, ML_Material, Demand_Units.');return;}
+    var plan={}, n=0, dates={};
+    pr.rows.forEach(function(row){
+      var date=(row[di]||'').trim(), code=(row[mi]||'').trim(), q=parseFloat(row[qi]);
+      if(!date||!code||isNaN(q))return;
+      var fam = fi!=null?famFromLabel(row[fi]):null; if(!fam)fam=famFromCode(code); if(!fam)return;
+      // normalize date to MM/DD/YYYY
+      var mdy=date; var m=date.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m)mdy=m[2]+'/'+m[3]+'/'+m[1];
+      if(!plan[fam])plan[fam]={}; if(!plan[fam][code])plan[fam][code]={}; plan[fam][code][mdy]=q; n++; dates[mdy]=1;
+    });
+    if(!n){showToast('No demand rows parsed.');return;}
+    demandPlan=plan; savePlan();
+    var dl=Object.keys(dates).sort(); updateDemandStatus();
+    showToast('Demand plan loaded: '+n+' rows, '+dl.length+' days ('+dl[0]+' \u2192 '+dl[dl.length-1]+').');
+  }catch(err){showToast('Could not read demand file.');} };
+  r.readAsText(this.files[0]); };
+function updateDemandStatus(){ var el=$('demandStatus'); if(!el)return;
+  var fams=Object.keys(demandPlan); if(!fams.length){el.innerHTML='';return;}
+  var dset={}; fams.forEach(function(f){ Object.keys(demandPlan[f]).forEach(function(m){ Object.keys(demandPlan[f][m]).forEach(function(d){dset[d]=1;}); }); });
+  var dl=Object.keys(dset).sort();
+  var cnt=fams.map(function(f){return FAM_LABEL[f]+' '+Object.keys(demandPlan[f]).length;}).join(' \u00b7 ');
+  el.innerHTML='<span style="color:#1B5E20;font-weight:600;">Demand plan \u2713</span> '+ (dl.length?(dl[0]+' \u2192 '+dl[dl.length-1]):'') +' &middot; '+cnt+' <button class="config-btn" id="btnDemandClear" style="padding:3px 8px;font-size:11px;">Clear</button>';
+  var bc=$('btnDemandClear'); if(bc)bc.onclick=function(){ if(!confirm('Clear the uploaded demand plan?'))return; demandPlan={}; savePlan(); updateDemandStatus(); showToast('Demand plan cleared.'); };
+}
+
+// ===== TRANSIT / INBOUND UPLOAD (NABL export saved as CSV) =====
+var transitData={}; var transitMeta=null;
+function parseDate(s){ if(!s)return null; var d=new Date(s); return isNaN(d.getTime())?null:d; }
+function fmtEta(d){ if(!d)return null; return d.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit'})+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+var transitLoads={}; // keyed by trailer||bol : {trailer,bol,eta(Date),etaStr,customer,status:'ONROAD'|'ARRIVED', items:{'fam|mat':qty}}
+$('btnTransit').onclick=function(){$('fileTransit').click();};
+$('fileTransit').onchange=function(){ if(!this.files[0])return; var r=new FileReader();
+  r.onload=function(e){ try{
+    var pr=parseCsvRows(e.target.result); var H={}; pr.hdr.forEach(function(h,i){H[h.toUpperCase().replace(/[\s\/\(\)]+/g,'_').replace(/_+$/,'')]=i;});
+    function col(){ for(var a=0;a<arguments.length;a++){ if(H[arguments[a]]!=null) return H[arguments[a]]; } return null; }
+    var ci_status=col('NABL_TRAILER_STATUS'), ci_code=col('PRODUCT_CODE'),
+        ci_qty=col('ACTUAL_ROLLS_PALLETS','QTY_SHIPPED'), ci_cust=col('CUSTOMER'),
+        ci_trail=col('TRAILER_NUM','TRAILER'), ci_bol=col('BOL'), ci_eta=col('BENORE_DELIVERY_DATE_TIME_EST','DELIVERY_DATE_TIME');
+    if(ci_status==null||ci_code==null||ci_qty==null){showToast('Not a transit export \u2014 need STATUS, PRODUCT CODE, ROLLS/TUBS.');return;}
+    var loads={}, mats={}, shipRows=0;
+    pr.rows.forEach(function(row){
+      var st=(row[ci_status]||'').trim().toUpperCase(); if(st!=='SHIPPED')return;
+      if(ci_cust!=null){ var cu=(row[ci_cust]||'').trim().toUpperCase(); if(cu && cu!=='LXT') return; }
+      var code=(row[ci_code]||'').trim(); if(!code)return;
+      var fam=famFromCode(code); if(!fam)return;
+      var qty=parseFloat(row[ci_qty])||0; if(qty<=0)return;
+      var trail=ci_trail!=null?(row[ci_trail]||'').trim():''; var bol=ci_bol!=null?(row[ci_bol]||'').trim():'';
+      var eta=ci_eta!=null?parseDate(row[ci_eta]):null;
+      var key=(trail||bol||('load'+shipRows));
+      if(!loads[key]) loads[key]={trailer:trail,bol:bol,eta:null,etaStr:null,customer:(ci_cust!=null?(row[ci_cust]||'').trim():''),status:'ONROAD',items:{}};
+      var L=loads[key]; var ik=fam+'|'+code; L.items[ik]=nf((L.items[ik]||0)+qty);
+      if(eta && (!L.eta || eta<L.eta)){ L.eta=eta; L.etaStr=fmtEta(eta); }
+      mats[ik]=1; shipRows++;
+    });
+    if(!shipRows){showToast('No SHIPPED rows for tracked materials found.');return;}
+    // preserve ARRIVED status for trailers already received earlier today
+    Object.keys(loads).forEach(function(k){ if(transitLoads[k]&&transitLoads[k].status==='ARRIVED') loads[k].status='ARRIVED'; });
+    transitLoads=loads; rebuildTransitAgg();
+    var when=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    var onroad=Object.keys(loads).filter(function(k){return loads[k].status==='ONROAD';});
+    transitMeta={time:when,trailers:onroad.length,mats:Object.keys(mats).length};
+    updateTransitStatus(); saveSession();
+    showToast('Transit updated '+when+' \u2014 '+onroad.length+' trailers on the road, '+Object.keys(mats).length+' materials. Type a trailer/BOL in + Reception to receive a whole load.');
+  }catch(err){showToast('Could not read transit file.');} };
+  r.readAsText(this.files[0]); };
+// aggregate (ON-ROAD only) for the DOS material key-set
+function rebuildTransitAgg(){ transitData={};
+  Object.keys(transitLoads).forEach(function(k){ var L=transitLoads[k]; if(L.status!=='ONROAD')return;
+    Object.keys(L.items).forEach(function(ik){ var p=ik.split('|'),fam=p[0],mat=p[1]; if(!transitData[fam])transitData[fam]={}; if(!transitData[fam][mat])transitData[fam][mat]={qty:0}; transitData[fam][mat].qty=nf(transitData[fam][mat].qty+L.items[ik]); }); });
+}
+// find a load by trailer# or BOL (case-insensitive exact)
+function findLoad(q){ q=(q||'').trim().toUpperCase(); if(!q)return null;
+  var keys=Object.keys(transitLoads);
+  for(var i=0;i<keys.length;i++){ var L=transitLoads[keys[i]]; if((L.trailer||'').toUpperCase()===q||(L.bol||'').toUpperCase()===q) return {key:keys[i],load:L}; }
+  return null;
+}
+function updateTransitStatus(){ var el=$('transitStatus'); if(!el)return;
+  if(!transitMeta){el.style.display='none';return;}
+  el.style.display=''; el.innerHTML='&#128667; Transit '+transitMeta.time+' \u00b7 '+transitMeta.trailers+' trailers \u00b7 '+transitMeta.mats+' mats';
+}
+
+try{updateDemandStatus();}catch(e){}
+// ===== SESSION BACKUP / RESTORE =====
+$('btnBackup').onclick=function(){
+  var payload={v:16,exportedAt:new Date().toISOString(),date:dateStr,appMode:appMode,counter:counter,startTime:startTime,activeFamily:activeFamily,entries:entries,rackStatus:rackStatus,seq:seq,fytData:fytData,demand:demandStore,demandPlan:demandPlan,transit:transitData,transitLoads:transitLoads,transitMeta:transitMeta,machineComplete:machineComplete,fixHistory:fixHistory};
+  download((CONFIG.site||'Count')+'_SESSION_BACKUP_'+dateStr+'.json',JSON.stringify(payload),'application/json');
+  showToast('Backup saved \u2014 put it on the Shared Drive.');
+};
+
+// WALK PATH GUIDE
+function stopDone(s){ if(s.t==='rack'){ var p=areaProgress(s.c); return p.total===0||p.done>=p.total; } return machineDone(s.c) || entries.some(function(e){return e.family===activeFamily&&(e.locType==='Machine'||e.locType==='Blind')&&e.status==='CHECKED'&&(e.where.split(' / ')[0])===s.c;}); }
+function nextPending(){ var wp=walkPathList(); for(var i=0;i<wp.length;i++){ if(!stopDone(wp[i])) return i; } return -1; }
+function updateWalkBar(){ var wp=walkPathList(),bar=$('walkBar'); if(!bar)return; if(!wp.length){bar.style.display='none';return;} bar.style.display='flex'; var done=0; wp.forEach(function(s){if(stopDone(s))done++;}); var np=(walkPos>=0)?nextPendingFrom(walkPos):nextPending(); var nx=np>=0?wp[np]:null; $('walkNext').innerHTML=nx?('Next: <b>'+nx.c+'</b> <span style="color:#6b7280;font-size:11px;">('+(nx.t==='rack'?'rack':'machine')+')</span>'):'All stops done \u2713'; $('walkProg').textContent=done+'/'+wp.length; }
+var walkPos=-1;
+function nextPendingFrom(pos){ var wp=walkPathList(); var i; for(i=pos+1;i<wp.length;i++){ if(!stopDone(wp[i])) return i; } for(i=0;i<=pos&&i<wp.length;i++){ if(!stopDone(wp[i])) return i; } return -1; }
+window.walkGoto=function(idx){ var wp=walkPathList(); if(idx<0||idx>=wp.length)return; if(!guardPending())return; walkPos=idx; var s=wp[idx];
+  if(s.t==='rack'&&appMode==='fyt'){ showTab('rack'); var sel=$('rackAreaSelect'); sel.value=s.c; if(sel.value!==s.c){showToast(s.c+' has no items in today\u2019s system data.'); closeWalkModal(); return;} selectRackArea(s.c); }
+  else { showTab('count'); if(appMode==='fyt'&&DATA[activeFamily].machines.indexOf(s.c)<0){showToast(s.c+' not in machine list.');return;} resetLoc(); var sel=$('locSelect'); sel.value=s.c; if(sel.value!==s.c){showToast(s.c+' not available in this mode.'); return;} selectLoc(s.c); }
+  closeWalkModal(); updateWalkBar(); showToast('Go to '+s.c); };
+$('walkGo').onclick=function(){ if(!guardPending())return; var wp=walkPathList(); if(walkPos>=0&&walkPos<wp.length){ var cur=wp[walkPos]; if(cur.t==='machine'&&appMode==='fyt'&&DATA[activeFamily].machines.indexOf(cur.c)>=0){ markMachineComplete(cur.c); } } var np=(walkPos>=0)?nextPendingFrom(walkPos):nextPending(); if(np<0){ updateWalkBar(); showToast('All stops done \u2713'); return; } window.walkGoto(np); };
+$('walkList').onclick=function(){ renderWalkModal(); $('walkModal').classList.add('show'); };
+$('walkModalClose').onclick=function(){$('walkModal').classList.remove('show');};
+$('walkModal').onclick=function(e){if(e.target===$('walkModal'))$('walkModal').classList.remove('show');};
+function closeWalkModal(){$('walkModal').classList.remove('show');}
+function renderWalkModal(){ var wp=walkPathList(),np=nextPending(),h=''; wp.forEach(function(s,i){ var d=stopDone(s); h+='<div class="wl-item'+(i===np?' wl-cur':'')+'" onclick="walkGoto('+i+')"><span class="wl-num">'+(i+1)+'</span><span class="'+(d?'wl-done':'')+'">'+(d?'\u2713 ':'')+s.c+'</span><span class="wl-type '+(s.t==='rack'?'wl-r':'wl-m')+'">'+(s.t==='rack'?'RACK':'MACH')+'</span></div>'; }); $('walkModalBody').innerHTML=h||'<div class="empty-state">No walk path in config for this family.</div>'; }
+
+// SYSTEM vs ACTUAL: FYT staging (SA) + queue (QU), by machine, vs what was counted.
+function recoData(){
+  var sysT=LOCT.staging, quT=LOCT.machine;
+  var sys={}; // machine -> {mat:{units,qty}}
+  fytData[activeFamily].forEach(function(r){
+    if(r.tipalm!==sysT && r.tipalm!==quT) return;
+    var loc=r.area; if(!sys[loc])sys[loc]={};
+    if(!sys[loc][r.prod])sys[loc][r.prod]={u:0,c:0};
+    sys[loc][r.prod].u+=parseFloat(r.canido||0); sys[loc][r.prod].c+=parseFloat(r.cantidad||0);
+  });
+  var act={}; // machine -> {mat:{units,conv}}   (machine name only, strip any bin)
+  entries.forEach(function(e){
+    if(e.family!==activeFamily) return;
+    if(e.locType!=='Machine' && e.locType!=='Blind') return;
+    var loc=e.where.indexOf(' / ')>=0?e.where.split(' / ')[0]:e.where;
+    if(!act[loc])act[loc]={};
+    if(!act[loc][e.material])act[loc][e.material]={u:0,c:0};
+    act[loc][e.material].u+=(e.countedUnits||0); act[loc][e.material].c+=(e.countedConv||0);
+  });
+  // union of locations, machine order from config
+  var order=DATA[activeFamily].machines.slice();
+  Object.keys(sys).forEach(function(l){if(order.indexOf(l)<0)order.push(l);});
+  Object.keys(act).forEach(function(l){if(order.indexOf(l)<0)order.push(l);});
+  var lines=[];
+  order.forEach(function(loc){
+    var mats={}; if(sys[loc])Object.keys(sys[loc]).forEach(function(m){mats[m]=1;}); if(act[loc])Object.keys(act[loc]).forEach(function(m){mats[m]=1;});
+    Object.keys(mats).sort(natCmp).forEach(function(m){
+      var s=(sys[loc]&&sys[loc][m])?sys[loc][m]:{u:0,c:0}; var a=(act[loc]&&act[loc][m])?act[loc][m]:{u:0,c:0};
+      lines.push({loc:loc,mat:m,sysU:s.u,sysC:s.c,actU:a.u,actC:a.c,dU:nf(a.u-s.u),dC:nf(a.c-s.c)});
+    });
+  });
+  return lines;
+}
+$('btnReco').onclick=function(){ recoView='material'; renderReco(); $('recoModal').classList.add('show');
+};
+$('recoClose').onclick=function(){$('recoModal').classList.remove('show');};
+$('recoModal').onclick=function(e){if(e.target===$('recoModal'))$('recoModal').classList.remove('show');};
+// ===== SYSTEM vs ACTUAL — CHART VIEWS =====
+var recoView='material'; var TOL=1; var MAT_CAP=15;
+function recoAggByLoc(){
+  var lines=recoData(), loc={};
+  lines.forEach(function(l){ if(!loc[l.loc])loc[l.loc]={net:0,mats:0}; loc[l.loc].net=nf(loc[l.loc].net+l.dU); if(l.sysU!==0||l.actU!==0)loc[l.loc].mats++; });
+  var out=[]; Object.keys(loc).forEach(function(k){ if(loc[k].mats>0||loc[k].net!==0) out.push({loc:k,net:nf(loc[k].net),mats:loc[k].mats}); });
+  out.sort(function(a,b){return a.net-b.net;});
+  return out;
+}
+function recoMatLines(){
+  // one row per machine+material that actually has stock on either side; keep delta in units
+  var lines=recoData().filter(function(l){return l.sysU!==0||l.actU!==0;});
+  return lines;
+}
+function scoreCard(){
+  var lines=recoMatLines(), cfg=DATA[activeFamily];
+  var flagged=lines.filter(function(l){return Math.abs(l.dU)>TOL;});
+  var within=lines.length-flagged.length;
+  var acc=lines.length?Math.round(within/lines.length*100):0;
+  var today=new Date().toLocaleDateString('en-US',{weekday:'short',month:'2-digit',day:'2-digit',year:'numeric'});
+  var h='<div style="font-family:var(--sans);font-weight:800;color:var(--navy);font-size:16px;">'+(CONFIG.site||'PlayCraft')+' Staging Accuracy &mdash; '+FAM_LABEL[activeFamily]+'</div>';
+  h+='<div style="font-size:12px;color:var(--muted);margin-bottom:3px;">System vs Actual count &middot; '+today+' &middot; counter '+counter+'</div>';
+  h+='<div style="font-size:13px;margin-bottom:10px;"><b style="color:#1B5E20;">'+within+'/'+lines.length+' within \u00b1'+TOL+' '+cfg.unit+' ('+acc+'%)</b> &middot; <b style="color:#C0392B;">'+flagged.length+' over '+TOL+' '+cfg.unit+'</b></div>';
+  return {html:h, flagged:flagged, within:within, total:lines.length};
+}
+function barRow(label,val,maxAbs,unit,flag){
+  var frac=Math.min(Math.abs(val)/maxAbs,1)*46, neg=val<0;
+  var col=!flag?'#c8ccd1':(neg?'#C0392B':'#1F6FB2');
+  var h='<div style="display:flex;align-items:center;gap:6px;margin:3px 0;font-size:12px;">';
+  h+='<div style="width:96px;text-align:right;font-family:var(--mono);font-size:11px;font-weight:600;overflow:hidden;white-space:nowrap;">'+label+'</div>';
+  h+='<div style="flex:1;position:relative;height:19px;background:#f4f5f7;border-radius:3px;"><div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:#c0c4cc;"></div>';
+  if(neg) h+='<div style="position:absolute;right:50%;top:2px;bottom:2px;width:'+frac+'%;background:'+col+';border-radius:3px 0 0 3px;"></div>';
+  else if(val>0) h+='<div style="position:absolute;left:50%;top:2px;bottom:2px;width:'+frac+'%;background:'+col+';border-radius:0 3px 3px 0;"></div>';
+  h+='</div><div style="width:48px;font-weight:700;color:'+(flag?col:'#9aa0a6')+';">'+(val>0?'+':'')+val.toFixed(2)+'</div></div>';
+  return h;
+}
+function recoMaterialHTML(){
+  var cfg=DATA[activeFamily], sc=scoreCard();
+  if(!sc.total) return '<div class="empty-state">Nothing to compare yet.</div>';
+  var flagged=sc.flagged.slice().sort(function(a,b){return Math.abs(b.dU)-Math.abs(a.dU);});
+  var maxAbs=1; flagged.forEach(function(l){if(Math.abs(l.dU)>maxAbs)maxAbs=Math.abs(l.dU);});
+  var h='<div id="svaShot" style="background:#fff;padding:14px 12px;">'+sc.html;
+  if(!flagged.length){ h+='<div style="font-size:13px;color:#1B5E20;font-weight:600;padding:8px 0;">\u2713 Every line within \u00b1'+TOL+' '+cfg.unit+' \u2014 clean staging.</div>'; }
+  else {
+    var show=flagged.slice(0,MAT_CAP);
+    show.forEach(function(l){ h+=barRow(l.loc+' \u00b7 '+l.mat, l.dU, maxAbs, cfg.unit, true); });
+    if(flagged.length>MAT_CAP) h+='<div style="font-size:11px;color:var(--muted);margin-top:6px;">+ '+(flagged.length-MAT_CAP)+' more over '+TOL+' '+cfg.unit+' \u2014 in the CSV / Table view.</div>';
+  }
+  h+='<div style="font-size:10px;color:#9aa0a6;margin-top:8px;">Loss (left, red) = system shows more than counted \u2192 likely unscanned use. Gain (right, blue) = found more than system. '+sc.within+' line(s) within \u00b1'+TOL+' '+cfg.unit+' (counting variance) not shown.</div></div>';
+  return h;
+}
+function recoChartHTML(){
+  var cfg=DATA[activeFamily], rows=recoAggByLoc();
+  if(!rows.length) return '<div class="empty-state">Nothing to compare yet.</div>';
+  var flagged=rows.filter(function(r){return Math.abs(r.net)>TOL;}).length, within=rows.length-flagged;
+  var acc=Math.round(within/rows.length*100);
+  var maxAbs=1; rows.forEach(function(r){if(Math.abs(r.net)>maxAbs)maxAbs=Math.abs(r.net);});
+  var today=new Date().toLocaleDateString('en-US',{weekday:'short',month:'2-digit',day:'2-digit',year:'numeric'});
+  var h='<div id="svaShot" style="background:#fff;padding:14px 12px;">';
+  h+='<div style="font-family:var(--sans);font-weight:800;color:var(--navy);font-size:16px;">'+(CONFIG.site||'PlayCraft')+' Staging by Area &mdash; '+FAM_LABEL[activeFamily]+'</div>';
+  h+='<div style="font-size:12px;color:var(--muted);margin-bottom:3px;">Net variance per location &middot; '+today+'</div>';
+  h+='<div style="font-size:13px;margin-bottom:10px;"><b style="color:#1B5E20;">'+within+'/'+rows.length+' areas within \u00b1'+TOL+' '+cfg.unit+' ('+acc+'%)</b> &middot; <b style="color:#C0392B;">'+flagged+' over</b></div>';
+  rows.forEach(function(r){ h+=barRow(r.loc, r.net, maxAbs, cfg.unit, Math.abs(r.net)>TOL); });
+  h+='<div style="font-size:10px;color:#9aa0a6;margin-top:8px;">Net per area (materials summed). Gray = within \u00b1'+TOL+' '+cfg.unit+'. Use \u201cBy Material\u201d for the specific items.</div></div>';
+  return h;
+}
+function recoTableHTML(){
+  var cfg=DATA[activeFamily], lines=recoData();
+  if(!lines.length) return '<div class="empty-state">Nothing to compare yet &mdash; load system data and log machine counts first.</div>';
+  var curLoc=null,h='<table class="log-table" style="table-layout:auto;"><thead><tr><th>Machine</th><th>ML#</th><th>Sys '+cfg.unit+'</th><th>Act '+cfg.unit+'</th><th>&Delta;</th><th>&Delta; '+cfg.convUnit+'</th></tr></thead><tbody>';
+  lines.forEach(function(l){ var same=l.loc===curLoc; curLoc=l.loc; var col=l.dU===0?'#5f6368':(l.dU<0?'#C0392B':'#1B5E20');
+    h+='<tr><td style="font-weight:600;'+(same?'color:#bbb;':'')+'">'+(same?'\u00a0':l.loc)+'</td><td style="font-family:var(--mono);font-size:11px;">'+l.mat+'</td><td>'+l.sysU.toFixed(2)+'</td><td>'+l.actU.toFixed(2)+'</td><td style="font-weight:700;color:'+col+'">'+(l.dU>0?'+':'')+l.dU.toFixed(2)+'</td><td style="color:'+col+'">'+(l.dC>0?'+':'')+fmt(l.dC)+'</td></tr>'; });
+  h+='</tbody></table><div style="font-size:11px;color:var(--muted);margin-top:8px;">Sys = System '+LOCT.staging+'+'+LOCT.machine+'. Act = your counts. \u0394 '+cfg.convUnit+' = same gap in '+cfg.convUnit+'. Read-only.</div>';
+  return h;
+}
+function renderReco(){
+  var b=$('recoBody');
+  if(recoView==='material') b.innerHTML=recoMaterialHTML();
+  else if(recoView==='area') b.innerHTML=recoChartHTML();
+  else b.innerHTML=recoTableHTML();
+  $('recoMatBtn').classList.toggle('active',recoView==='material');
+  $('recoAreaBtn').classList.toggle('active',recoView==='area');
+  $('recoTblBtn').classList.toggle('active',recoView==='table');
+}
+$('recoMatBtn').onclick=function(){recoView='material';renderReco();};
+$('recoAreaBtn').onclick=function(){recoView='area';renderReco();};
+$('recoTblBtn').onclick=function(){recoView='table';renderReco();};
+
+$('recoExport').onclick=function(){var cfg=DATA[activeFamily],lines=recoData(); if(!lines.length){showToast('Nothing to compare.');return;}
+  var rows=[['Date','Counter','Family','Machine','ML_Material','Sys_'+cfg.unitPlural,'Actual_'+cfg.unitPlural,'Var_'+cfg.unitPlural,'Sys_'+cfg.convUnit,'Actual_'+cfg.convUnit,'Var_'+cfg.convUnit]];
+  lines.forEach(function(l){rows.push([dateStr,counter,FAM_LABEL[activeFamily],l.loc,l.mat,l.sysU.toFixed(2),l.actU.toFixed(2),l.dU.toFixed(2),l.sysC.toFixed(2),l.actC.toFixed(2),l.dC.toFixed(2)]);});
+  download((CONFIG.site||'Count')+'_'+activeFamily+'_SysVsActual_'+dateStr+'.csv',rows.map(function(r){return r.map(esc).join(',');}).join('\r\n')); showToast('Reconciliation CSV downloaded.');};
+
+// FYT CORRECTIONS: ADDED (not in FYT), MISSING (in system, not found), DISCREPANCY (qty differs)
+// ===== FYT FIX MEMORY (persists recurring discrepancies across days) =====
+var FIXHIST_KEY='daily_count_fixhist_v1'; var fixHistory={};
+(function(){ try{fixHistory=JSON.parse(localStorage.getItem(FIXHIST_KEY))||{};}catch(e){fixHistory={};} })();
+function saveFixHist(){ try{localStorage.setItem(FIXHIST_KEY,JSON.stringify(fixHistory));}catch(e){} }
+function fixSig(kind,e){ return activeFamily+'|'+kind+'|'+(e.where||'')+'|'+(e.material||''); }
+// Merge today's corrections into history. Idempotent per date. Returns true if changed.
+function recordFixes(){
+  var changed=false;
+  function add(kind,e){ var sig=fixSig(kind,e);
+    var h=fixHistory[sig]; if(!h){ h=fixHistory[sig]={family:activeFamily,kind:kind,where:e.where||'',material:e.material||'',firstSeen:dateStr,lastSeen:dateStr,dates:[dateStr]}; changed=true; return; }
+    if(h.dates.indexOf(dateStr)<0){ h.dates.push(dateStr); h.lastSeen=dateStr; if(dateStr<h.firstSeen)h.firstSeen=dateStr; changed=true; }
+  }
+  corrAdded().forEach(function(e){add('Not in System',e);});
+  corrMissing().forEach(function(e){add('Missing',e);});
+  corrDisc().forEach(function(e){add('Qty differs',e);});
+  if(changed)saveFixHist();
+  return changed;
+}
+function daysBetween(a,b){ var d1=new Date(a+'T00:00:00'),d2=new Date(b+'T00:00:00'); return Math.round((d2-d1)/86400000); }
+// history rows for the CURRENT family, most-persistent first
+function fixHistRows(){ var out=[];
+  Object.keys(fixHistory).forEach(function(sig){ var h=fixHistory[sig]; if(h.family!==activeFamily)return;
+    out.push({sig:sig,kind:h.kind,where:h.where,material:h.material,firstSeen:h.firstSeen,lastSeen:h.lastSeen,days:h.dates.length,span:daysBetween(h.firstSeen,h.lastSeen)+1,openToday:h.dates.indexOf(dateStr)>=0}); });
+  out.sort(function(a,b){ if(b.days!==a.days)return b.days-a.days; return a.firstSeen<b.firstSeen?-1:1; });
+  return out;
+}
+// how many days has THIS live correction been flagged (for inline badge)
+function fixAgeFor(kind,e){ var h=fixHistory[fixSig(kind,e)]; if(!h)return null; return {days:h.dates.length,firstSeen:h.firstSeen,span:daysBetween(h.firstSeen,h.lastSeen)+1}; }
+function recurringCount(){ return fixHistRows().filter(function(r){return r.days>=2;}).length; }
+
+function corrAdded(){ return entries.filter(function(e){return e.family===activeFamily && e.status==='ADDED';}); }
+function corrMissing(){ return entries.filter(function(e){return e.family===activeFamily && e.status==='MISSING';}); }
+function corrDisc(){ return entries.filter(function(e){return e.family===activeFamily && e.status==='DISCREPANCY';}); }
+function corrBadge(kind,e){ var kmap={added:'Not in System',missing:'Missing',disc:'Qty differs'}; var age=fixAgeFor(kmap[kind]||kind,e); if(!age||age.days<2)return ''; var col=age.days>=3?'#C0392B':'#B26A00'; return ' <span style="font-size:9px;font-weight:700;color:'+col+';background:#FBE9E7;border-radius:8px;padding:1px 6px;">repeat \u00d7'+age.days+'</span>'; }
+function corrSectionHTML(title,sub,rows,kind){
+  if(!rows.length) return '';
+  var cfg=DATA[activeFamily];
+  var h='<div style="font-weight:600;margin:14px 0 4px;">'+title+' <span style="font-size:11px;color:var(--muted);font-weight:400;">'+sub+'</span></div>';
+  h+='<table class="log-table" style="table-layout:auto;"><thead><tr><th>Location</th><th>Product</th>';
+  if(kind==='added') h+='<th>Found</th>';
+  else if(kind==='missing') h+='<th>System had</th>';
+  else h+='<th>System</th><th>Found</th><th>&Delta;</th>';
+  h+='</tr></thead><tbody>';
+  rows.forEach(function(e){
+    h+='<tr><td style="font-weight:600;">'+e.where+'</td><td style="font-family:var(--mono);font-size:11px;">'+e.material+corrBadge(kind,e)+'</td>';
+    if(kind==='added') h+='<td>'+e.countedUnits.toFixed(2)+'</td>';
+    else if(kind==='missing') h+='<td>'+(e.fytUnits!=null?e.fytUnits.toFixed(2):'-')+'</td>';
+    else h+='<td>'+(e.fytUnits!=null?e.fytUnits.toFixed(2):'-')+'</td><td>'+e.countedUnits.toFixed(2)+'</td><td style="font-weight:600;color:'+(e.varUnits<0?'#C0392B':'#1B5E20')+'">'+(e.varUnits>0?'+':'')+e.varUnits.toFixed(2)+'</td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table>'; return h;
+}
+var nifView='today';
+$('btnNif').onclick=function(){ recordFixes(); nifView='today'; renderNif(); $('nifModal').classList.add('show'); };
+window.setNifView=function(v){ nifView=v; renderNif(); };
+function renderNif(){
+  var b=$('nifBody'); var rec=recurringCount();
+  var toggle='<div class="unit-toggle" style="display:inline-flex;margin-bottom:8px;"><button class="ut-btn'+(nifView==='today'?' active':'')+'" onclick="setNifView(\'today\')">Today</button><button class="ut-btn'+(nifView==='hist'?' active':'')+'" onclick="setNifView(\'hist\')">Recurring ('+rec+')</button></div>';
+  if(nifView==='hist'){ b.innerHTML=toggle+renderFixHist(); return; }
+  var a=corrAdded(),m=corrMissing(),d=corrDisc();
+  if(!a.length && !m.length && !d.length){ b.innerHTML=toggle+'<div class="empty-state">No system corrections logged today for '+FAM_LABEL[activeFamily]+'.</div>'; return; }
+  var h=toggle+'<p style="font-size:12px;color:var(--muted);margin-bottom:6px;">Floor vs System \u2014 send to dock/ops to correct scans. A <b>repeat</b> badge means it\u2019s been flagged before.</p>';
+  h+=corrSectionHTML('Not in System','on the floor, not in system \u2014 scan IN',a,'added');
+  h+=corrSectionHTML('Missing','in system, not found \u2014 scan OUT / investigate',m,'missing');
+  h+=corrSectionHTML('Quantity differs','system count is wrong \u2014 adjust',d,'disc');
+  b.innerHTML=h;
+}
+function renderFixHist(){ var rows=fixHistRows(); if(!rows.length)return '<div class="empty-state">No System-fix history yet. Items you flag get remembered here so you can show how long they\u2019ve gone unresolved.</div>';
+  var h='<p style="font-size:12px;color:var(--muted);margin-bottom:6px;">Every item you\u2019ve flagged, remembered across days. <b>Days flagged</b> = how many count days it appeared \u2014 evidence for escalation.</p>';
+  h+='<table class="log-table" style="table-layout:auto;"><thead><tr><th>Type</th><th>Location</th><th>ML#</th><th>First flagged</th><th>Last</th><th>Days flagged</th></tr></thead><tbody>';
+  rows.forEach(function(r){ var hot=r.days>=3; var warm=r.days===2;
+    h+='<tr'+(r.openToday?'':' style="opacity:.55;"')+'><td style="font-size:11px;">'+r.kind+'</td><td style="font-size:11px;">'+r.where+'</td><td style="font-family:var(--mono);font-size:11px;">'+r.material+'</td><td style="font-size:11px;">'+r.firstSeen+'</td><td style="font-size:11px;">'+r.lastSeen+'</td><td style="font-weight:700;'+(hot?'color:#C0392B;':warm?'color:#B26A00;':'')+'">'+r.days+(r.days>=2?' <span style="font-size:9px;">('+r.span+'d span)</span>':'')+'</td></tr>'; });
+  h+='</tbody></table>';
+  h+='<div style="margin-top:10px;"><button class="btn-sec" onclick="exportFixHist()">&#8681; History CSV</button> <button class="btn-sec" onclick="clearFixHist()">Clear history</button></div>';
+  return h;
+}
+window.exportFixHist=function(){ var rows=fixHistRows(); if(!rows.length){showToast('No history yet.');return;}
+  var out=[['Family','Correction_Type','Location','ML_Material','First_Flagged','Last_Flagged','Days_Flagged','Span_Days','Open_Today']];
+  rows.forEach(function(r){ out.push([FAM_LABEL[activeFamily],r.kind,r.where,r.material,r.firstSeen,r.lastSeen,r.days,r.span,r.openToday?'yes':'no']); });
+  download((CONFIG.site||'Count')+'_'+activeFamily+'_FYT_Fix_History_'+dateStr+'.csv',out.map(function(r){return r.map(esc).join(',');}).join('\r\n')); showToast('Fix-history CSV downloaded.'); };
+window.clearFixHist=function(){ if(!confirm('Clear ALL remembered System-fix history for every family? This cannot be undone.'))return; fixHistory={}; saveFixHist(); renderNif(); showToast('Fix history cleared.'); };
+$('nifClose').onclick=function(){$('nifModal').classList.remove('show');};
+$('nifModal').onclick=function(e){if(e.target===$('nifModal'))$('nifModal').classList.remove('show');};
+function corrAllRows(){
+  var out=[];
+  corrAdded().forEach(function(e){out.push(['Not in System',e.where,e.material,'',e.countedUnits.toFixed(2),'',e.note||'']);});
+  corrMissing().forEach(function(e){out.push(['Missing',e.where,e.material,(e.fytUnits!=null?e.fytUnits.toFixed(2):''),'0',(e.fytUnits!=null?(-e.fytUnits).toFixed(2):''),e.note||'']);});
+  corrDisc().forEach(function(e){out.push(['Qty differs',e.where,e.material,(e.fytUnits!=null?e.fytUnits.toFixed(2):''),e.countedUnits.toFixed(2),(e.varUnits>0?'+':'')+e.varUnits.toFixed(2),e.note||'']);});
+  return out;
+}
+$('nifCsv').onclick=function(){ var rows=corrAllRows(); if(!rows.length){showToast('Nothing to export.');return;}
+  var cfg=DATA[activeFamily];
+  var head=[['Date','Counter','Family','Correction_Type','Location','ML_Material','SYS_'+cfg.unit,'Found_'+cfg.unit,'Variance','Note']];
+  var body=rows.map(function(r){return [dateStr,counter,FAM_LABEL[activeFamily],r[0],r[1],r[2],r[3],r[4],r[5],r[6]];});
+  var all=head.concat(body);
+  download((CONFIG.site||'Count')+'_'+activeFamily+'_FYT_Corrections_'+dateStr+'.csv',all.map(function(r){return r.map(esc).join(',');}).join('\r\n'));
+  showToast('Corrections CSV downloaded.');
+};
+$('nifPrint').onclick=function(){ var a=corrAdded(),m=corrMissing(),d=corrDisc(); if(!a.length&&!m.length&&!d.length){showToast('Nothing to print.');return;}
+  var cfg=DATA[activeFamily];
+  var h='<div class="print-h">'+(CONFIG.site||'')+' \u2014 System Corrections \u2014 '+FAM_LABEL[activeFamily]+'</div>';
+  h+='<div class="print-sub">Date: '+dateStr+' &nbsp; Counter: '+counter+' &nbsp; Floor vs System differences \u2014 please correct scans.</div>';
+  function sec(title,rows,kind){ if(!rows.length)return '';
+    var s='<div class="print-area-h">'+title+'</div><table class="pt"><thead><tr><th>Location</th><th>Product</th>';
+    s+= kind==='disc' ? '<th>System</th><th>Found</th><th>Diff</th>' : (kind==='added'?'<th>Found</th>':'<th>System had</th>');
+    s+='<th class="wcol">Action taken</th></tr></thead><tbody>';
+    rows.forEach(function(e){ s+='<tr><td>'+e.where+'</td><td>'+e.material+'</td>';
+      if(kind==='disc') s+='<td>'+(e.fytUnits!=null?e.fytUnits.toFixed(2):'')+'</td><td>'+e.countedUnits.toFixed(2)+'</td><td>'+(e.varUnits>0?'+':'')+e.varUnits.toFixed(2)+'</td>';
+      else if(kind==='added') s+='<td>'+e.countedUnits.toFixed(2)+'</td>';
+      else s+='<td>'+(e.fytUnits!=null?e.fytUnits.toFixed(2):'')+'</td>';
+      s+='<td></td></tr>'; });
+    s+='</tbody></table>'; return s; }
+  h+=sec('Not in System (scan IN)',a,'added')+sec('Missing (scan OUT / investigate)',m,'missing')+sec('Quantity differs (adjust)',d,'disc');
+  $('printArea').innerHTML=h; window.print();
+};
+
+// COMBINED EXPORT (all families in one file)
+
+
+// PRINT FALLBACK: blank count sheet (product ref left, write space right)
+$('btnPrint').onclick=function(){
+  var cfg=DATA[activeFamily]; var pa=$('printArea');
+  var h='<div class="print-h">'+(CONFIG.site||'')+' Daily Count \u2014 '+FAM_LABEL[activeFamily]+'</div>';
+  h+='<div class="print-sub">Date: ______________  Counter: ______________  Start: ______  End: ______ &nbsp; ('+dateStr+', printed fallback)</div>';
+  if(appMode==='fyt'){
+    coAreas().forEach(function(a){var rows=areaRows(a); if(!rows.length)return;
+      h+='<div class="print-area-h">Area '+a+'</div><table class="pt"><thead><tr><th>Bin</th><th>Product</th><th>System Units</th><th class="wcol">Counted</th><th class="wcol">Notes</th></tr></thead><tbody>';
+      rows.forEach(function(r){h+='<tr><td>'+(r.bin==='---'?'-':r.bin)+'</td><td>'+r.prod+'</td><td>'+parseFloat(r.canido||0).toFixed(2)+'</td><td></td><td></td></tr>';});
+      h+='</tbody></table>';});
+  } else {
+    keyAreas().forEach(function(a){var bs=keyBins(a); if(!bs.length)return;
+      h+='<div class="print-area-h">Area '+a+'</div><table class="pt"><thead><tr><th>Bin</th><th class="wcol">Product</th><th class="wcol">Counted</th><th class="wcol">Notes</th></tr></thead><tbody>';
+      bs.forEach(function(b){h+='<tr><td>'+b+'</td><td></td><td></td><td></td></tr>';}); h+='</tbody></table>';});
+  }
+  h+='<div class="print-area-h">Machines / '+LOCT.machine+'</div><table class="pt"><thead><tr><th>Machine</th><th class="wcol">Product</th><th class="wcol">Counted</th><th class="wcol">Notes</th></tr></thead><tbody>';
+  cfg.machines.forEach(function(m){h+='<tr><td>'+m+'</td><td></td><td></td><td></td></tr>';}); h+='</tbody></table>';
+  pa.innerHTML=h; window.print();
+};
+
+function renderLog(){saveSession(); var cfg=DATA[activeFamily],ent=entries.filter(function(e){return e.family===activeFamily;});
+  if(!ent.length){$('logBody').innerHTML='<tr><td colspan="8"><div class="empty-state">No '+FAM_LABEL[activeFamily]+' entries yet.</div></td></tr>'; $('summaryRow').style.display='none'; $('windowLine').style.display='none'; return;}
+  var inv=ent.filter(function(e){return ['Machine','Rack','Blind','Reception'].indexOf(e.locType)>=0;});
+  var totU=inv.reduce(function(s,e){return s+(e.countedUnits||0);},0),totC=inv.reduce(function(s,e){return s+(e.countedConv||0);},0);
+  var mach=ent.filter(function(e){return e.locType==='Machine'||e.locType==='Blind';}).length;
+  var machSet={}; ent.forEach(function(e){if((e.locType==='Machine'||e.locType==='Blind')){var lc=e.where.indexOf(' / ')>=0?e.where.split(' / ')[0]:e.where; if(DATA[activeFamily].machines.indexOf(lc)>=0)machSet[lc]=1;}}); var machDone=Object.keys(machSet).length, machTot=DATA[activeFamily].machines.length;
+  var rack=ent.filter(function(e){return e.locType==='Rack';}).length, rec=ent.filter(function(e){return e.locType==='Reception';}).length;
+  var coTot=0,coDone=0; if(appMode==='fyt'){coAreas().forEach(function(a){var p=areaProgress(a);coTot+=p.total;coDone+=p.done;});}
+  $('summaryRow').style.display='grid';
+  var cards='<div class="stat hl"><div class="stat-label">Total '+cfg.unitPlural+'</div><div class="stat-value">'+totU.toFixed(2)+'</div></div>'+
+    '<div class="stat hl2"><div class="stat-label">Total '+cfg.convUnit+'</div><div class="stat-value">'+Math.round(totC).toLocaleString('en-US')+'</div></div>'+
+    '<div class="stat"><div class="stat-label">'+(appMode==='fyt'?'Machine':'Locations')+'</div><div class="stat-value">'+mach+'</div></div>'+'<div class="stat"><div class="stat-label">Mach Cover</div><div class="stat-value" style="font-size:14px;">'+machDone+'/'+machTot+'</div></div>';
+  if(appMode==='fyt')cards+='<div class="stat"><div class="stat-label">Rack \u2713</div><div class="stat-value">'+rack+'</div></div><div class="stat"><div class="stat-label">Rack Cover</div><div class="stat-value" style="font-size:14px;">'+coDone+'/'+coTot+'</div></div>';
+  cards+='<div class="stat"><div class="stat-label">Recept</div><div class="stat-value">'+rec+'</div></div>';
+  $('summaryRow').innerHTML=cards;
+  var last=ent[0]; ent.forEach(function(e){if(e.seq>last.seq)last=e;});
+  $('windowLine').style.display='block'; $('windowLine').innerHTML='Count window: '+(startTime||'?')+' \u2192 '+last.time+' &middot; each line time-stamped';
+  var sorted=ent.slice().sort(function(a,b){return b.seq-a.seq;});
+  $('logBody').innerHTML=sorted.map(function(e){var convCell,detail,pill,tp;
+    if(e.locType==='Machine'||e.locType==='Blind'){ if(e.status==='CHECKED'){convCell='<span class="sb" style="background:#eee;color:#666;">CHECKED</span>'; detail='no material'; } else { convCell=e.countedConv!=null?fmt(e.countedConv):'-'; detail=e.note||'-'; } pill='loc-m'; tp=e.locType==='Machine'?'M':'B';}
+    else if(e.locType==='Reception'){convCell=e.countedConv!=null?fmt(e.countedConv):'-'; detail=e.bol?'BOL '+e.bol:'received'; pill='loc-c'; tp='R+';}
+    else{if(e.status==='ADDED'){convCell='<span class="sb sb-add">ADDED</span>'; detail='+'+e.countedUnits.toFixed(2)+' '+cfg.unit+' (new)';}
+      else{convCell=e.status==='MATCH'?'<span class="sb sb-ok">MATCH</span>':e.status==='DISCREPANCY'?'<span class="sb sb-flag">&Delta;</span>':'<span class="sb sb-miss">MISS</span>';
+        detail=e.status==='MATCH'?'FYT ok':(e.varUnits>0?'+':'')+e.varUnits.toFixed(2)+' '+cfg.unit+(e.varConv!=null?' / '+(e.varConv>0?'+':'')+fmt(e.varConv):'');}
+      pill='loc-r'; tp='R';}
+    return '<tr><td style="color:#6b7280">'+e.time+'</td><td style="font-weight:600;">'+e.where+'</td><td style="font-family:var(--mono);font-size:11px;">'+e.material+'</td><td>'+(e.countedUnits!=null?e.countedUnits.toFixed(2):'-')+(e.isEdit?' <span style="background:#FFE082;color:#7A5C00;font-size:9px;padding:1px 4px;border-radius:3px;">EXTRA</span>':'')+'</td><td style="color:var(--navy);font-weight:600;">'+convCell+'</td><td style="color:#6b7280;font-size:11px;">'+detail+'</td><td><span class="loc-pill '+pill+'">'+tp+'</span></td><td><button class="del-btn" onclick="delEntry(\''+e.id+'\')">&times;</button></td></tr>';}).join(''); updateWalkBar();}
+window.delEntry=function(id){var e=null; for(var k=0;k<entries.length;k++){if(String(entries[k].id)===String(id)){e=entries[k];break;}}
+  if(e&&e.rackKey&&rackStatus[e.rackKey]){delete rackStatus[e.rackKey]; buildAreaDropdown(); if(tab==='rack')renderRack($('rackAreaSelect').value||null,$('rackBinSelect').value||null);}
+  entries=entries.filter(function(x){return String(x.id)!==String(id);}); renderLog();};
+
+var toastTimer;
+function showToast(m){$('toast').innerHTML=m; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(function(){$('toast').classList.remove('show');},2800);}
+
+buildStartUI();
+
+(function(){ var b=document.getElementById('btnDemo'); if(!b)return;
+  b.onclick=function(){
+    try{
+      fytData={}; FAM_IDS.forEach(function(f){ fytData[f]=(DEMO_FYT[f]||[]).map(function(r){return {tipalm:r.tipalm,area:r.area,bin:r.bin,prod:r.prod,canido:r.canido,cantidad:r.cantidad,fecfab:r.fecfab};}); });
+      counter='Demo User';
+      if(typeof startSession==='function'){ startSession(); }
+      else { var cn=document.getElementById('counterName'); if(cn)cn.value='Demo User'; var sb=document.getElementById('btnStart')||document.getElementById('startBtn'); if(sb)sb.click(); }
+      showToast('Demo data loaded \u2014 walk the floor, validate racks, check Days of Stock.');
+    }catch(e){ showToast('Could not load demo data.'); }
+  };
+})();
+</script>
+</body>
+</html>

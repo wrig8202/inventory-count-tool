@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From a two-hour paper count to a supply-risk system — Olivia N. Wright</title>
+<meta name="description" content="How I turned a manual, two-hour daily inventory count into an offline, config-driven counting app and a variance workbook — a project write-up in STAR format.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  :root{
+    --teal:#0E3139; --teal-700:#16454F; --teal-soft:#E7EEEF; --ochre:#D9A55B; --dusty:#7FAEBF;
+    --blush:#D799B2; --gold:#F7C979; --paper:#FBFAF8; --card:#FFFFFF; --line:#E7E1DF; --muted:#6C6A6B;
+    --good:#2E7D6B; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--paper);color:var(--teal);font-family:var(--sans);line-height:1.68;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 26px;}
+  ::selection{background:var(--ochre);color:var(--teal);}
+  a{color:var(--teal-700);}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;max-width:960px;margin:0 auto;}
+  .brand{display:flex;align-items:baseline;gap:12px;}
+  .brand .ow{font-family:var(--serif);font-style:italic;font-weight:600;font-size:30px;color:var(--teal);line-height:1;}
+  .brand .nm{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;}
+  .topbar nav a{color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:500;margin-left:22px;}
+  .topbar nav a:hover{color:var(--teal);}
+
+  header.post{padding:52px 0 24px;}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ochre);margin-bottom:20px;}
+  header.post h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,5.2vw,50px);line-height:1.08;letter-spacing:-.01em;margin-bottom:20px;}
+  header.post h1 em{font-style:italic;color:var(--teal-700);}
+  header.post .standfirst{font-size:19px;color:var(--muted);}
+  .byline{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);}
+
+  .star{display:block;padding:40px 0 8px;border-top:1px solid var(--line);margin-top:36px;}
+  .star:first-of-type{border-top:none;margin-top:8px;}
+  .star .tag{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--teal);border-radius:6px;padding:5px 12px;margin-bottom:16px;}
+  .star h2{font-family:var(--serif);font-weight:600;font-size:clamp(24px,4vw,32px);letter-spacing:-.01em;margin-bottom:16px;}
+  .star h2 em{font-style:italic;color:var(--teal-700);}
+  p{margin-bottom:17px;max-width:70ch;}
+  p .lead-in{font-weight:600;}
+  h3{font-family:var(--serif);font-weight:600;font-size:19px;margin:26px 0 10px;}
+  ul{list-style:none;margin:4px 0 20px;}
+  li{position:relative;padding:7px 0 7px 26px;border-bottom:1px solid var(--line);font-size:15.5px;}
+  li:last-child{border-bottom:none;}
+  li::before{content:'';position:absolute;left:2px;top:16px;width:8px;height:8px;border-radius:2px;background:var(--ochre);}
+  .pull{background:var(--teal-soft);border-left:3px solid var(--ochre);border-radius:0 12px 12px 0;padding:20px 24px;margin:8px 0 22px;font-family:var(--serif);font-style:italic;font-size:19px;color:var(--teal-700);}
+  .result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:8px 0 22px;}
+  .rc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;}
+  .rc .n{font-family:var(--serif);font-weight:700;font-size:30px;line-height:1;color:var(--teal);}
+  .rc .n .u{font-size:15px;color:var(--muted);font-family:var(--sans);font-weight:500;}
+  .rc .l{font-size:13px;color:var(--muted);margin-top:8px;}
+  @media(max-width:600px){.result-grid{grid-template-columns:1fr;}}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 26px;}
+  .chip{font-family:var(--mono);font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:7px 14px;color:var(--teal);}
+  .cta{text-align:center;padding:44px 0 12px;border-top:1px solid var(--line);margin-top:38px;}
+  .cta a{display:inline-flex;align-items:center;gap:9px;background:var(--teal);color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 26px;border-radius:11px;}
+  .essence{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--teal-700);margin-bottom:22px;}
+  footer{border-top:1px solid var(--line);padding:32px 0 52px;text-align:center;color:var(--muted);font-size:13px;margin-top:20px;}
+  footer .fb{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--teal);}
+  footer .t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:6px 0 12px;}
+  .note{font-size:13px;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:10px;padding:15px 18px;margin:26px 0 0;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="ow">ow</span><span class="nm">Olivia N. Wright</span></div>
+  <nav><a href="index.html">Case study</a><a href="demo.html">Live demo</a></nav>
+</div>
+
+<header class="post wrap">
+  <div class="eyebrow">Project write-up · Operations &amp; data</div>
+  <h1>I replaced a two-hour paper count with a system that tells me <em>what to worry about</em>.</h1>
+  <p class="standfirst">A shop-floor inventory count was the number the whole supply chain trusted — rebuilt by hand every morning, and never twice the same. Here's how I turned it into an offline counting app and a variance model, and what changed as a result.</p>
+  <div class="byline">Olivia N. Wright · Operations &amp; data · Built with AI-assisted development</div>
+</header>
+
+<main class="wrap">
+
+  <section class="star">
+    <span class="tag">Situation</span>
+    <h2>The count <em>was</em> the number — and the number moved.</h2>
+    <p>Every morning, two material families were inventoried by walking the floor with a printed sheet: eyeball a partial container, tally it, add it up on a calculator, type it into a spreadsheet. It took roughly two hours, spanned the shift change, and happened while trucks were unloading and material was moving to the lines. So the "count" wasn't a point-in-time snapshot — it was a moving observation stitched together across two and a half hours.</p>
+    <p>The plant's tracking system existed, but line-side moves weren't scanned reliably, so the planner distrusted it and rebuilt inventory by hand instead. That hand-built number then fed supplier orders directly.</p>
+    <div class="pull">The real problem wasn't speed. It was that two trained people could walk the same floor and get two different totals — and a supplier order was riding on it.</div>
+  </section>
+
+  <section class="star">
+    <span class="tag">Task</span>
+    <h2>Make the count <em>reproducible</em>, then make it decide something.</h2>
+    <p>I set two goals, in order. First, stabilize: give the count a defined method so it stops depending on who's holding the clipboard. Second, make it useful beyond a total — connect on-hand to demand and inbound so the morning number answers the question that actually matters: <em>am I going to run out, and if so, of what?</em></p>
+    <p>Constraints shaped everything. It had to run on a plant tablet with no network and no install, survive a browser with no IT footprint, and keep every calculation visible — because these numbers become supplier conversations, and a black box doesn't earn that kind of trust.</p>
+  </section>
+
+  <section class="star">
+    <span class="tag">Action</span>
+    <h2>An offline counting app, then a variance model on top of it.</h2>
+    <p><span class="lead-in">I built a single-file, offline, config-driven counting tool</span> — one HTML file, zero dependencies, no build step, that runs from a tablet's file browser. Everything specific to a plant (materials, standards, storage bins, machines, the physical walk order, demand, tolerances) lives in one config block, so the same engine can point at a different site or a different industry without touching the code.</p>
+
+    <h3>What it does on the floor</h3>
+    <ul>
+      <li><span style="font-weight:600;">Guides the walk.</span> It prompts the next area or machine in the exact order you move through the building; one button completes a stop and advances, and it still tracks progress when you go out of order.</li>
+      <li><span style="font-weight:600;">Shows what's expected.</span> At each machine it surfaces the materials the system says should be there, so you're confirming against reality instead of hunting.</li>
+      <li><span style="font-weight:600;">Separates signal from noise.</span> System-vs-actual is shown per location with a tolerance band: differences within normal counting variance stay quiet; anything larger — almost always an unscanned move — is flagged.</li>
+      <li><span style="font-weight:600;">Reads days of stock honestly.</span> On-hand ÷ demand, then the version that matters: what's inbound, its ETA, and coverage <em>after</em> receipt. A low number with a truck two hours out is a different problem than a low number with nothing coming.</li>
+      <li><span style="font-weight:600;">Links transit to receiving.</span> Planned trailers count as inbound, never as on-hand. Type a trailer or BOL and its whole contents post to the count in one tap — and drop out of inbound so nothing is double-counted.</li>
+      <li><span style="font-weight:600;">Remembers problems.</span> Recurring discrepancies persist across days, so a location that keeps going unscanned shows exactly how long it's been flagged — the evidence you need to fix a process instead of counting around it.</li>
+    </ul>
+
+    <h3>What it feeds</h3>
+    <p>The app doesn't try to be the system of record for the math. It exports a clean CSV that drops into a companion planning workbook, which turns the day's count — plus the carrier feed and the ordering system — into two views of variance: how suppliers are performing against what was promised, and whether received loads match their standard weights. That division of labor is deliberate: the app owns the floor, the workbook owns the math, and the seam between them is a CSV, which keeps the app offline and every calculation auditable.</p>
+    <div class="chips">
+      <span class="chip">Vanilla JavaScript</span><span class="chip">HTML + CSS</span><span class="chip">Zero dependencies</span><span class="chip">Offline-first</span><span class="chip">Config-driven</span><span class="chip">localStorage</span><span class="chip">Excel / Power Query</span><span class="chip">CSV pipeline</span>
+    </div>
+  </section>
+
+  <section class="star">
+    <span class="tag">Result</span>
+    <h2>A repeatable count that now <em>drives decisions</em>.</h2>
+    <div class="result-grid">
+      <div class="rc"><div class="n">~2<span class="u"> hrs</span></div><div class="l">manual daily count the tool replaces</div></div>
+      <div class="rc"><div class="n">1<span class="u"> file</span></div><div class="l">offline, no server, no install</div></div>
+      <div class="rc"><div class="n">2</div><div class="l">material families, mixed units, one engine</div></div>
+      <div class="rc"><div class="n">0</div><div class="l">dependencies — auditable end to end</div></div>
+    </div>
+    <p><span class="lead-in">The count became reproducible.</span> A defined method and a guided walk mean the total no longer depends on who counted, and differences from the system now carry a reason instead of a shrug.</p>
+    <p><span class="lead-in">The morning number now answers a question.</span> Instead of a static total, it shows what's at risk after inbound is accounted for — the difference between reacting to a stockout and preventing one.</p>
+    <p><span class="lead-in">Discrepancies became evidence.</span> Because problems persist across days, "the system is wrong" turned into "this location has been unscanned for six of the last eight days" — which is what actually moves a process fix.</p>
+    <p><span class="lead-in">And the whole thing stayed transparent.</span> Keeping the math in a visible workbook rather than a black-box app is what lets the numbers stand up in a supplier conversation.</p>
+    <div class="note"><b>On method:</b> the biggest lesson wasn't technical. It was <em>stabilize before you optimize</em> — understand what the count was really for, and why the workaround existed, before automating anything. Every feature answered a real friction on the floor, in the order it actually came up, because I was the one using it.</div>
+  </section>
+
+  <div class="cta">
+    <div class="essence">Insightful by design. Impactful by intention.</div>
+    <a href="demo.html">&#9658;&nbsp; Try the live demo</a>
+  </div>
+
+</main>
+
+<footer>
+  <div class="fb">Olivia N. Wright</div>
+  <div class="t">Data. Operations. AI. Strategy.</div>
+  <a href="https://oliviawright.me" style="color:var(--teal);text-decoration:none;font-weight:600;">oliviawright.me</a>
+</footer>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Count Tool — a config-driven offline shop-floor system · Olivia N. Wright</title>
+<meta name="description" content="A single-file, offline-first inventory counting tool for a factory floor: walk-path guidance, system-vs-actual reconciliation, and days-of-stock. A case study by Olivia N. Wright.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    /* brand palette */
+    --teal:#0E3139;         /* deep teal — ink & primary */
+    --teal-700:#16454F;
+    --teal-soft:#E7EEEF;
+    --dusty:#7FAEBF;        /* dusty blue */
+    --ochre:#D9A55B;        /* ochre gold — primary accent */
+    --blush:#D799B2;        /* muted blush */
+    --gold:#F7C979;         /* golden yellow */
+    --warm-gray:#E3DDDE;    /* pale warm gray */
+    --paper:#FBFAF8;        /* warm off-white */
+    --card:#FFFFFF;
+    --line:#E7E1DF;
+    --muted:#6C6A6B;
+    --good:#2E7D6B;         /* within tolerance (teal-green, on-brand) */
+    --good-soft:#E4F0EC;
+    --flag:#C25E7A;         /* over tolerance (blush-derived) */
+    --flag-soft:#F7E7ED;
+    --serif:'Playfair Display',Georgia,serif;
+    --sans:'Inter',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--paper);color:var(--teal);font-family:var(--sans);line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 26px;}
+  a{color:var(--teal);}
+  ::selection{background:var(--ochre);color:var(--teal);}
+  .mono{font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;}
+
+  /* ---------- top bar ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 26px;max-width:1020px;margin:0 auto;}
+  .brand{display:flex;align-items:baseline;gap:12px;}
+  .brand .ow{font-family:var(--serif);font-style:italic;font-weight:600;font-size:30px;color:var(--teal);line-height:1;}
+  .brand .nm{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;}
+  .topbar nav a{color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:500;margin-left:22px;}
+  .topbar nav a:hover{color:var(--teal);}
+  @media(max-width:640px){.topbar nav a{margin-left:14px;font-size:12.5px;}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:60px 0 26px;}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ochre);margin-bottom:22px;}
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(36px,6.2vw,62px);line-height:1.05;letter-spacing:-.005em;margin-bottom:22px;}
+  .hero h1 em{font-style:italic;color:var(--teal-700);position:relative;}
+  .hero h1 em::after{content:'';position:absolute;left:0;right:0;bottom:.06em;height:.10em;background:var(--gold);opacity:.55;z-index:-1;}
+  .hero .lede{font-size:clamp(17px,2.3vw,20px);color:var(--muted);max-width:62ch;}
+  .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px;}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:14px 24px;border-radius:11px;font-weight:600;font-size:15px;text-decoration:none;border:1.5px solid transparent;transition:transform .12s ease,background .15s ease;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{background:var(--teal-700);}
+  .btn-ghost{border-color:var(--line);color:var(--teal);background:var(--card);}
+  .btn-ghost:hover{border-color:var(--ochre);}
+
+  /* ---------- SIGNATURE: tolerance band ---------- */
+  .signature{margin:46px 0 8px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 26px 24px;box-shadow:0 12px 30px -22px rgba(14,49,57,.4);}
+  .sig-cap{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+  .sig-cap h3{font-family:var(--serif);font-weight:600;font-size:20px;}
+  .sig-cap span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;}
+  .band{position:relative;height:66px;border-radius:10px;overflow:hidden;background:linear-gradient(90deg,var(--flag-soft) 0 22%,var(--good-soft) 22% 78%,var(--flag-soft) 78% 100%);}
+  .band .zero{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#c9d3d0;}
+  .band .toler{position:absolute;top:0;bottom:0;left:22%;width:56%;border-left:1.5px dashed var(--good);border-right:1.5px dashed var(--good);}
+  .band .dot{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(14,49,57,.3);left:50%;}
+  .band .lab{position:absolute;font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;color:var(--muted);top:7px;transform:translateX(-50%);white-space:nowrap;}
+  .band-legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;font-size:13.5px;color:var(--muted);}
+  .band-legend b{color:var(--teal);font-weight:600;}
+  .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:middle;margin-right:7px;}
+
+  /* ---------- stat strip ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:36px 0;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .stat .n{font-family:var(--serif);font-weight:600;font-size:32px;letter-spacing:-.01em;line-height:1;}
+  .stat .n .u{font-size:16px;color:var(--muted);font-family:var(--sans);font-weight:500;}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:8px;}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr);}}
+
+  /* ---------- sections ---------- */
+  section{padding:46px 0;border-top:1px solid var(--line);}
+  .sec-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre);margin-bottom:15px;}
+  h2{font-family:var(--serif);font-weight:600;font-size:clamp(25px,4vw,36px);letter-spacing:-.01em;margin-bottom:18px;}
+  h2 em{font-style:italic;color:var(--teal-700);}
+  .prose p{color:var(--teal);max-width:68ch;margin-bottom:16px;}
+  .prose p.sub{color:var(--muted);}
+  .callout{background:var(--teal-soft);border-left:3px solid var(--ochre);border-radius:0 var(--radius) var(--radius) 0;padding:20px 24px;margin:10px 0 4px;font-size:15px;}
+  .callout b{color:var(--teal);}
+
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;}
+  .pair .col{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;}
+  .pair .col h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;}
+  .pair .before h4{color:var(--flag);}
+  .pair .after h4{color:var(--good);}
+  .pair ul{list-style:none;font-size:14.5px;}
+  .pair li{padding:8px 0 8px 24px;position:relative;color:var(--teal);border-bottom:1px solid var(--line);}
+  .pair li:last-child{border-bottom:none;}
+  .pair .before li::before{content:'\2717';position:absolute;left:0;color:var(--flag);font-weight:700;}
+  .pair .after li::before{content:'\2713';position:absolute;left:0;color:var(--good);font-weight:700;}
+  @media(max-width:720px){.pair{grid-template-columns:1fr;}}
+
+  .feat{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:10px;}
+  .feat .f{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;transition:transform .15s ease,box-shadow .15s ease;}
+  .feat .f:hover{transform:translateY(-3px);box-shadow:0 16px 34px -26px rgba(14,49,57,.5);}
+  .feat .f .ic{font-size:22px;margin-bottom:11px;display:block;}
+  .feat .f h4{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:6px;}
+  .feat .f p{font-size:14px;color:var(--muted);margin:0;}
+  @media(max-width:720px){.feat{grid-template-columns:1fr;}}
+
+  .steps{margin-top:12px;}
+  .steps .step{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--line);}
+  .steps .step:last-child{border-bottom:none;}
+  .steps .step .num{counter-increment:s;flex:none;width:42px;height:42px;border-radius:11px;background:var(--teal);color:var(--gold);display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:18px;}
+  .steps{counter-reset:s;}
+  .steps .step .num::before{content:counter(s,decimal-leading-zero);}
+  .steps .step h4{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:3px;}
+  .steps .step p{font-size:14px;color:var(--muted);margin:0;max-width:64ch;}
+
+  .stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .chip{font-family:var(--mono);font-size:12px;letter-spacing:.03em;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:7px 15px;color:var(--teal);}
+
+  .final-cta{text-align:center;padding:60px 0;}
+  .final-cta .essence{font-family:var(--serif);font-style:italic;font-size:clamp(20px,3vw,27px);color:var(--teal-700);margin-bottom:26px;}
+  .final-cta p{color:var(--muted);max-width:52ch;margin:0 auto 26px;}
+
+  footer{border-top:1px solid var(--line);padding:34px 0 54px;text-align:center;color:var(--muted);font-size:13.5px;}
+  footer .fbrand{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--teal);}
+  footer .tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:6px 0 14px;}
+  footer a{text-decoration:none;font-weight:600;color:var(--teal);}
+  .note{font-size:12.5px;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:10px;padding:14px 18px;margin-top:26px;}
+
+  @media(prefers-reduced-motion:no-preference){
+    .band .dot{transition:left .85s cubic-bezier(.22,1,.36,1);}
+    .reveal{opacity:0;transform:translateY(15px);transition:opacity .6s ease,transform .6s ease;}
+    .reveal.in{opacity:1;transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="ow">ow</span><span class="nm">Olivia N. Wright</span></div>
+  <nav>
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#build">Build</a>
+    <a href="demo.html">Live demo</a>
+  </nav>
+</div>
+
+<header class="hero wrap">
+  <div class="eyebrow">Case study — shop-floor systems</div>
+  <h1>A daily inventory count that stopped being a <em>two-hour guess</em>.</h1>
+  <p class="lede">A single offline file that turns a manual factory-floor material count into a guided walk, a system-vs-actual check, and a days-of-stock read — no server, no install, no network. Data. Operations. Built to be used.</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="demo.html">&#9658;&nbsp; Open the live demo</a>
+    <a class="btn btn-ghost" href="#build">How it works</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="signature reveal">
+    <div class="sig-cap">
+      <h3>The idea the whole tool is built around</h3>
+      <span>system vs. actual, per location</span>
+    </div>
+    <div class="band" id="band">
+      <div class="toler"></div>
+      <div class="zero"></div>
+      <span class="lab" style="left:22%">&minus;1 tub</span>
+      <span class="lab" style="left:50%">match</span>
+      <span class="lab" style="left:78%">+1 tub</span>
+    </div>
+    <div class="band-legend">
+      <span><span class="swatch" style="background:var(--good)"></span><b>Within a tub</b> — human counting variance. Shown, never flagged.</span>
+      <span><span class="swatch" style="background:var(--flag)"></span><b>Over a tub</b> — a real gap, almost always an un-scanned move.</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat reveal"><div class="n">~2<span class="u"> hrs</span></div><div class="l">daily count it replaces</div></div>
+    <div class="stat reveal"><div class="n">1<span class="u"> file</span></div><div class="l">no server, no install</div></div>
+    <div class="stat reveal"><div class="n">100<span class="u">%</span></div><div class="l">offline &amp; config-driven</div></div>
+    <div class="stat reveal"><div class="n">2</div><div class="l">material families, mixed units</div></div>
+    <div class="stat reveal"><div class="n">0</div><div class="l">dependencies, no build step</div></div>
+  </div>
+</div>
+
+<section id="problem" class="wrap">
+  <div class="sec-eyebrow">The problem</div>
+  <h2>The count <em>was</em> the number — and the number moved.</h2>
+  <div class="prose">
+    <p>On the floor, the morning inventory of dough compound and packaging film was a paper walk: eyeball a half-full tub, tally it, add it up on a calculator, type it into a spreadsheet. The plant's tracking system existed, but line-side moves weren't scanned reliably — so the planner rebuilt inventory by hand every morning and fed that hand-built number straight into supplier orders.</p>
+    <p class="sub">The deeper issue wasn't speed. It was that two trained people walking the same floor got two different totals — and a supplier order was riding on it.</p>
+  </div>
+  <div class="pair">
+    <div class="col before reveal">
+      <h4>Before</h4>
+      <ul>
+        <li>2+ hours of manual counting, daily</li>
+        <li>Partial tubs estimated by eye</li>
+        <li>Tally &rarr; calculator &rarr; spreadsheet, by hand</li>
+        <li>No two counters agreed</li>
+        <li>System data distrusted, so ignored</li>
+      </ul>
+    </div>
+    <div class="col after reveal">
+      <h4>After</h4>
+      <ul>
+        <li>A guided walk path, tap by tap</li>
+        <li>Enter tubs <em>or</em> kg straight off the tag</li>
+        <li>Totals and conversions computed live</li>
+        <li>System-vs-actual, with a tolerance band</li>
+        <li>Exceptions surfaced for the floor to fix</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="solution" class="wrap">
+  <div class="sec-eyebrow">The solution</div>
+  <h2>Everything the count needs, on one screen you can <em>screenshot</em>.</h2>
+  <div class="feat">
+    <div class="f reveal"><span class="ic">&#129517;</span><h4>Guided walk path</h4><p>Prompts the next area or machine in the exact order you walk the floor. One button completes a stop and advances; go out of order and it still tracks what's done.</p></div>
+    <div class="f reveal"><span class="ic">&#9878;</span><h4>System vs. actual</h4><p>Your count against what the system expected, per location and material. Small gaps stay quiet; real ones — the tolerance band — turn to attention.</p></div>
+    <div class="f reveal"><span class="ic">&#128202;</span><h4>Days of stock, with inbound</h4><p>On-hand &divide; demand, then the honest version: what's inbound, its ETA, and days-of-stock <em>after</em> receipt. A low number with a truck arriving reads differently than one with nothing coming.</p></div>
+    <div class="f reveal"><span class="ic">&#128666;</span><h4>Transit &rarr; receiving</h4><p>Load the carrier feed; planned trailers count as inbound, never as on-hand. Type a trailer or BOL and its whole contents post to the count in one tap — no double-counting.</p></div>
+    <div class="f reveal"><span class="ic">&#9873;</span><h4>Discrepancies that remember</h4><p>Found-not-in-system, missing, and quantity-off items export for the floor team — and persist across days, so a location that keeps going unscanned shows exactly how long it's been flagged.</p></div>
+    <div class="f reveal"><span class="ic">&#128202;</span><h4>Feeds the variance model</h4><p>One tap exports a planning CSV that drops into a companion workbook, turning the day's count into supplier and std-weight variance — the numbers that drive ordering.</p></div>
+  </div>
+  <div class="callout reveal" style="margin-top:22px;">
+    <b>Config-driven by design.</b> Materials, standards, rack bins, machines, the walk order, demand, and tolerances all live in one JSON block. Point it at a different plant — or a different industry — and the same code runs. The demo you can open is that exact mechanism, fed a fictional factory. Counts leave as CSV and feed a variance workbook, so the math stays visible and auditable instead of buried in the app.
+  </div>
+</section>
+
+<section id="build" class="wrap">
+  <div class="sec-eyebrow">How it was built</div>
+  <h2>Shipped in the field, <em>one real problem at a time</em>.</h2>
+  <p class="sub" style="max-width:66ch;">Built as the working planner using it, so every feature answered a real friction on the floor — not a spec written in advance. The order below is the order it actually happened.</p>
+  <div class="steps">
+    <div class="step reveal"><div class="num"></div><div><h4>Watch the real count</h4><p>Time it, map the walk, learn why the system data was distrusted. Design the data model before a line of UI.</p></div></div>
+    <div class="step reveal"><div class="num"></div><div><h4>Replace the paper</h4><p>Tile-based counts by machine, rack validation against system data, live unit conversion — the core loop first.</p></div></div>
+    <div class="step reveal"><div class="num"></div><div><h4>Follow the floor</h4><p>Encode the actual walk path so the tool self-prompts each stop in the order you physically move.</p></div></div>
+    <div class="step reveal"><div class="num"></div><div><h4>Turn counting into control</h4><p>System-vs-actual with a tolerance band, plus days-of-stock against demand — so the count drives decisions, not just totals.</p></div></div>
+    <div class="step reveal"><div class="num"></div><div><h4>Close the loop</h4><p>Correction sheets and a critical list the floor and planning teams act on — the count now feeds the whole workflow.</p></div></div>
+  </div>
+
+  <div style="margin-top:32px;">
+    <div class="sec-eyebrow" style="margin-bottom:12px;">Built with</div>
+    <div class="stack">
+      <span class="chip">Vanilla JavaScript</span>
+      <span class="chip">HTML + CSS</span>
+      <span class="chip">Zero dependencies</span>
+      <span class="chip">No build step</span>
+      <span class="chip">localStorage</span>
+      <span class="chip">Config-driven</span>
+      <span class="chip">Offline-first</span>
+      <span class="chip">Single file</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>About this demo.</b> PlayCraft is a fictional company and every number here is synthetic. It mirrors the shape of a real tool I built and use in a manufacturing planning role, with all proprietary data, names, and specifics removed. The engineering, the workflow design, and the decisions are the real work. Built with AI-assisted development.
+  </div>
+</section>
+
+<section class="final-cta wrap">
+  <div class="essence reveal">Insightful by design. Impactful by intention.</div>
+  <p>The demo loads a full fictional factory with one tap — walk the floor, validate racks, and watch the tolerance band sort signal from noise.</p>
+  <a class="btn btn-primary" href="demo.html">&#9658;&nbsp; Open the live demo</a>
+</section>
+
+<footer>
+  <div class="fbrand">Olivia N. Wright</div>
+  <div class="tag">Data. Operations. AI. Strategy.</div>
+  <a href="https://oliviawright.me">oliviawright.me</a>
+</footer>
+
+<script>
+  (function(){
+    var band=document.getElementById('band');
+    var pts=[{x:50,g:1},{x:57,g:1},{x:44,g:1},{x:63,g:1},{x:14,g:0},{x:88,g:0},{x:8,g:0},{x:70,g:1}];
+    var good=getComputedStyle(document.documentElement).getPropertyValue('--good');
+    var flag=getComputedStyle(document.documentElement).getPropertyValue('--flag');
+    pts.forEach(function(p,idx){
+      var d=document.createElement('div'); d.className='dot';
+      d.style.background=p.g?good:flag; d.style.top=(28+(idx%3)*16)+'%';
+      band.appendChild(d);
+      setTimeout(function(){ d.style.left=p.x+'%'; }, 220+idx*95);
+    });
+  })();
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+</script>
+</body>
+</html>
